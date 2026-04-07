@@ -8,519 +8,15 @@
 <title>Finanças</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23c9a96e;stop-opacity:1' /><stop offset='100%' style='stop-color:%23e8c98a;stop-opacity:1' /></linearGradient></defs><rect width='64' height='64' fill='%230f0f0f'/><circle cx='32' cy='32' r='26' fill='url(%23grad)'/><circle cx='32' cy='32' r='22' fill='%230f0f0f'/><path d='M 32 16 L 32 48 M 28 22 Q 32 20 36 22 M 28 34 Q 32 32 36 34 M 28 46 Q 32 44 36 46' stroke='%23c9a96e' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0f0f0f;
-    --surface: #181818;
-    --surface2: #212121;
-    --surface3: #2a2a2a;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.13);
-    --text: #f0ede8;
-    --text2: #9a958e;
-    --text3: #5a5651;
-    --accent: #c9a96e;
-    --accent2: #e8c98a;
-    --accent-dim: rgba(201,169,110,0.12);
-    --red: #d4665a;
-    --red-dim: rgba(212,102,90,0.12);
-    --green: #6aaa84;
-    --green-dim: rgba(106,170,132,0.12);
-    --blue: #6b9fd4;
-    --blue-dim: rgba(107,159,212,0.12);
-    --r: 10px;
-    --r-sm: 6px;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-
-  /* Layout */
-  .shell {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    min-height: 100vh;
-  }
-
-  /* Sidebar */
-  .sidebar {
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-  }
-
-  .logo {
-    padding: 28px 24px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 20px;
-    color: var(--accent2);
-    letter-spacing: -0.3px;
-  }
-
-  .logo-sub {
-    font-size: 11px;
-    color: var(--text3);
-    margin-top: 2px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .nav {
-    padding: 16px 12px;
-    flex: 1;
-  }
-
-  .nav-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--text3);
-    padding: 0 12px;
-    margin-bottom: 6px;
-    margin-top: 16px;
-  }
-
-  .nav-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 9px 12px;
-    border-radius: var(--r-sm);
-    border: none;
-    background: transparent;
-    color: var(--text2);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.15s;
-  }
-
-  .nav-btn:hover { background: var(--surface2); color: var(--text); }
-
-  .nav-btn.active {
-    background: var(--accent-dim);
-    color: var(--accent2);
-    font-weight: 500;
-  }
-
-  .nav-icon {
-    width: 16px;
-    height: 16px;
-    opacity: 0.7;
-    flex-shrink: 0;
-  }
-
-  .nav-btn.active .nav-icon { opacity: 1; }
-
-  /* Month nav in sidebar */
-  .month-nav {
-    margin: 16px 12px;
-    background: var(--surface2);
-    border-radius: var(--r-sm);
-    padding: 12px;
-    border: 1px solid var(--border);
-  }
-
-  .month-nav-label {
-    font-size: 10px;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-  }
-
-  .month-nav-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-  }
-
-  .month-nav-row button {
-    background: none;
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    border-radius: 4px;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-  }
-
-  .month-nav-row button:hover { border-color: var(--accent); color: var(--accent); }
-
-  .month-current {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    text-align: center;
-    flex: 1;
-  }
-
-  /* Main */
-  .main {
-    padding: 36px 40px;
-    min-height: 100vh;
-  }
-
-  .page { display: none; }
-  .page.active { display: block; }
-
-  .page-header {
-    margin-bottom: 28px;
-  }
-
-  .page-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 28px;
-    color: var(--text);
-    letter-spacing: -0.5px;
-  }
-
-  .page-sub {
-    font-size: 13px;
-    color: var(--text3);
-    margin-top: 4px;
-  }
-
-  /* Cards */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 20px 24px;
-    margin-bottom: 20px;
-  }
-
-  .card-title {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text3);
-    margin-bottom: 16px;
-  }
-
-  /* Metrics */
-  .metrics {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 24px;
-  }
-
-  .metric {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 18px 20px;
-    transition: border-color 0.15s;
-  }
-
-  .metric:hover { border-color: var(--border2); }
-
-  .metric-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--text3);
-    margin-bottom: 8px;
-  }
-
-  .metric-val {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px;
-    color: var(--text);
-    letter-spacing: -0.5px;
-  }
-
-  .metric-val.c-red { color: var(--red); }
-  .metric-val.c-green { color: var(--green); }
-  .metric-val.c-gold { color: var(--accent); }
-
-  /* Two col */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
-  /* Form */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
-  .form-col { display: flex; flex-direction: column; gap: 5px; }
-  .form-col.span2 { grid-column: span 2; }
-
-  label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--text3);
-  }
-
-  input, select {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--r-sm);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 9px 12px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.15s;
-    -webkit-appearance: none;
-  }
-
-  input:focus, select:focus { border-color: var(--accent); }
-  input::placeholder { color: var(--text3); }
-
-  select option { background: #222; }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 9px 18px;
-    border-radius: var(--r-sm);
-    border: 1px solid var(--border2);
-    background: transparent;
-    color: var(--text2);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-
-  .btn:hover { background: var(--surface3); color: var(--text); border-color: var(--border2); }
-
-  .btn-primary {
-    background: var(--accent-dim);
-    border-color: var(--accent);
-    color: var(--accent2);
-  }
-
-  .btn-primary:hover { background: rgba(201,169,110,0.2); color: var(--accent2); }
-
-  .btn-danger { color: var(--red); border-color: transparent; }
-  .btn-danger:hover { background: var(--red-dim); border-color: var(--red); }
-
-  .btn-sm { padding: 5px 10px; font-size: 11px; }
-
-  /* List items */
-  .list-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 13px 0;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-  }
-
-  .list-item:last-child { border-bottom: none; }
-
-  .item-main { flex: 1; min-width: 0; }
-
-  .item-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .item-meta {
-    font-size: 11px;
-    color: var(--text3);
-    margin-top: 2px;
-  }
-
-  .item-val {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    white-space: nowrap;
-  }
-
-  /* Avatar */
-  .avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-    flex-shrink: 0;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  /* Badge */
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid;
-  }
-
-  .badge-gold { color: var(--accent); border-color: rgba(201,169,110,0.3); background: var(--accent-dim); }
-  .badge-green { color: var(--green); border-color: rgba(106,170,132,0.3); background: var(--green-dim); }
-  .badge-red { color: var(--red); border-color: rgba(212,102,90,0.3); background: var(--red-dim); }
-  .badge-blue { color: var(--blue); border-color: rgba(107,159,212,0.3); background: var(--blue-dim); }
-
-  /* Tag */
-  .tag {
-    display: inline-block;
-    padding: 1px 7px;
-    border-radius: 4px;
-    font-size: 10px;
-    background: var(--surface3);
-    color: var(--text2);
-    border: 1px solid var(--border);
-  }
-
-  /* Progress */
-  .progress-bar {
-    height: 4px;
-    background: var(--surface3);
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 6px;
-  }
-
-  .progress-fill {
-    height: 100%;
-    border-radius: 999px;
-    transition: width 0.4s ease;
-  }
-
-  /* Member bar */
-  .member-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .member-bar:last-child { border-bottom: none; }
-
-  .member-bar-info { flex: 1; }
-
-  .member-bar-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-    font-size: 13px;
-  }
-
-  /* Color swatch for member selection */
-  .color-options { display: flex; gap: 8px; flex-wrap: wrap; }
-  .color-opt {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .color-opt.selected { border-color: white; transform: scale(1.15); }
-
-  /* Parcela detail */
-  .parcela-card {
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .parcela-card:last-child { border-bottom: none; }
-
-  .parcela-top {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-
-  .parcela-actions { display: flex; gap: 6px; margin-left: auto; }
-
-  /* Empty */
-  .empty {
-    text-align: center;
-    color: var(--text3);
-    font-size: 13px;
-    padding: 32px;
-    font-style: italic;
-  }
-
-  /* Divider */
-  .divider { height: 1px; background: var(--border); margin: 16px 0; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
-
-  /* Responsive */
-  @media (max-width: 900px) {
-    .shell { grid-template-columns: 1fr; }
-    .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; }
-    .metrics { grid-template-columns: repeat(2, 1fr); }
-    .two-col { grid-template-columns: 1fr; }
-    .main { padding: 20px; }
-    .form-grid { grid-template-columns: 1fr; }
-    .form-grid.three { grid-template-columns: 1fr; }
-    .form-col.span2 { grid-column: span 1; }
-  }
-
-  @media (max-width: 600px) {
-    .metrics { grid-template-columns: 1fr 1fr; }
-    .sidebar { flex-direction: column; }
-    .nav { display: flex; flex-wrap: wrap; gap: 4px; padding: 12px; }
-    .nav-label { display: none; }
-    .nav-btn { width: auto; flex: 1; justify-content: center; }
-  }
-
-  /* Animations */
-  .page.active { animation: fadeIn 0.2s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-  .metric { animation: slideUp 0.25s ease both; }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
 
 <div class="shell">
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
-      <div class="logo-title">Ninos</div>
+      <div class="logo-title">Ninos Contabilidade</div>
       <div class="logo-sub">Controle de Gastos</div>
     </div>
 
@@ -535,27 +31,39 @@
 
     <nav class="nav">
       <div class="nav-label">Menu</div>
-      <button class="nav-btn active" onclick="showPage('resumo', this)">
+
+      <button class="nav-btn active" data-page="resumo" onclick="showPage('resumo', this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
           <rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/>
         </svg>
         Resumo
       </button>
-      <button class="nav-btn" onclick="showPage('gastos', this)">
+
+      <button class="nav-btn" data-page="gastos" onclick="showPage('gastos', this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v7M5.5 6.5h4a1 1 0 0 1 0 2h-3a1 1 0 0 0 0 2h4"/>
         </svg>
         Gastos
       </button>
-      <button class="nav-btn" onclick="showPage('parcelas', this)">
+
+      <button class="nav-btn" data-page="parcelas" onclick="showPage('parcelas', this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="1.5" y="3" width="13" height="10" rx="1.5"/>
           <path d="M1.5 6.5h13M5 10h2M9 10h2"/>
         </svg>
         Parcelas
       </button>
-      <button class="nav-btn" onclick="showPage('membros', this)">
+
+      <button class="nav-btn" data-page="cartoes" onclick="showPage('cartoes', this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/>
+          <path d="M1.5 6h13M4.5 10.5h3.5"/>
+        </svg>
+        Cartões
+      </button>
+
+      <button class="nav-btn" data-page="membros" onclick="showPage('membros', this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
           <circle cx="12" cy="5" r="2"/><path d="M12 9c1.66 0 3 1.34 3 3"/>
@@ -565,42 +73,59 @@
     </nav>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
 
-    <!-- RESUMO -->
     <div id="page-resumo" class="page active">
       <div class="page-header">
         <div class="page-title">Resumo</div>
         <div class="page-sub" id="resumo-sub">Visão geral do mês</div>
       </div>
+
       <div class="metrics" id="metrics"></div>
+
       <div class="two-col">
         <div class="card">
           <div class="card-title">Gastos por membro</div>
           <div id="by-member"></div>
         </div>
+
         <div class="card">
           <div class="card-title">Parcelas neste mês</div>
           <div id="parcelas-resumo"></div>
         </div>
       </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Distribuição de gastos no mês</div>
+          <canvas id="chart-categories" class="chart-canvas"></canvas>
+          <div id="chart-categories-legend" class="chart-legend"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Evolução dos gastos</div>
+          <canvas id="chart-evolution" class="chart-canvas"></canvas>
+          <div class="chart-note">Últimos 6 meses (gastos + parcelas)</div>
+        </div>
+      </div>
     </div>
 
-    <!-- GASTOS -->
     <div id="page-gastos" class="page">
       <div class="page-header">
         <div class="page-title">Gastos</div>
         <div class="page-sub">Registre despesas avulsas por membro</div>
       </div>
+
       <div class="card">
         <div class="card-title">Novo gasto</div>
+
         <div class="form-grid">
           <div class="form-col span2">
             <label>Descrição</label>
             <input id="g-desc" placeholder="ex: Mercado, Farmácia...">
           </div>
         </div>
+
         <div class="form-grid three">
           <div class="form-col">
             <label>Valor (R$)</label>
@@ -624,34 +149,52 @@
             </select>
           </div>
         </div>
-        <div class="form-grid">
+
+        <div class="form-grid three">
           <div class="form-col">
             <label>Mês de referência</label>
             <input id="g-mes" type="month">
           </div>
+          <div class="form-col">
+            <label>Forma de pagamento</label>
+            <select id="g-forma">
+              <option>Dinheiro</option>
+              <option>Débito</option>
+              <option>PIX</option>
+              <option>Crédito</option>
+            </select>
+          </div>
+          <div class="form-col">
+            <label>Cartão (se crédito)</label>
+            <select id="g-cartao" disabled></select>
+          </div>
         </div>
+
         <button class="btn btn-primary" onclick="addGasto()">+ Adicionar gasto</button>
       </div>
+
       <div class="card">
         <div class="card-title">Histórico</div>
         <div id="gastos-list"></div>
       </div>
     </div>
 
-    <!-- PARCELAS -->
     <div id="page-parcelas" class="page">
       <div class="page-header">
         <div class="page-title">Parcelas</div>
         <div class="page-sub">Controle de compras parceladas no cartão</div>
       </div>
+
       <div class="card">
         <div class="card-title">Nova parcela</div>
+
         <div class="form-grid">
           <div class="form-col span2">
             <label>Descrição</label>
             <input id="p-desc" placeholder="ex: TV Samsung, Notebook...">
           </div>
         </div>
+
         <div class="form-grid three">
           <div class="form-col">
             <label>Valor total (R$)</label>
@@ -666,34 +209,83 @@
             <input id="p-atual" type="number" min="1" placeholder="1">
           </div>
         </div>
+
         <div class="form-grid three">
           <div class="form-col">
             <label>Membro</label>
             <select id="p-membro"></select>
           </div>
           <div class="form-col">
-            <label>Cartão</label>
-            <input id="p-cartao" placeholder="ex: Nubank, Itaú...">
+            <label>Cartão cadastrado</label>
+            <select id="p-cartao"></select>
           </div>
           <div class="form-col">
             <label>Mês início</label>
             <input id="p-inicio" type="month">
           </div>
         </div>
+
+        <div class="helper-text">Dica: cadastre e atualize limites dos cartões na aba Cartões.</div>
+
         <button class="btn btn-primary" onclick="addParcela()">+ Adicionar parcela</button>
       </div>
+
       <div class="card">
         <div class="card-title">Parcelas cadastradas</div>
         <div id="parcelas-list"></div>
       </div>
     </div>
 
-    <!-- MEMBROS -->
+    <div id="page-cartoes" class="page">
+      <div class="page-header">
+        <div class="page-title">Cartões</div>
+        <div class="page-sub">Cadastre cartões, limite, fechamento e vencimento da fatura</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Novo cartão</div>
+
+        <div class="form-grid three">
+          <div class="form-col">
+            <label>Banco</label>
+            <select id="c-banco"></select>
+          </div>
+          <div class="form-col">
+            <label>Apelido (opcional)</label>
+            <input id="c-apelido" placeholder="ex: Nubank Principal">
+          </div>
+          <div class="form-col">
+            <label>Limite atual (R$)</label>
+            <input id="c-limite" type="number" min="0" step="0.01" placeholder="0,00">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-col">
+            <label>Dia de fechamento</label>
+            <input id="c-fechamento" type="number" min="1" max="31" value="7">
+          </div>
+          <div class="form-col">
+            <label>Dia de vencimento</label>
+            <input id="c-vencimento" type="number" min="1" max="31" value="15">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="addCartao()">+ Cadastrar cartão</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Cartões cadastrados</div>
+        <div id="cartoes-list"></div>
+      </div>
+    </div>
+
     <div id="page-membros" class="page">
       <div class="page-header">
         <div class="page-title">Membros</div>
         <div class="page-sub">Gerencie os membros da família</div>
       </div>
+
       <div class="card">
         <div class="card-title">Adicionar membro</div>
         <div class="form-grid">
@@ -709,6 +301,7 @@
         </div>
         <button class="btn btn-primary" onclick="addMembro()">+ Adicionar membro</button>
       </div>
+
       <div class="card">
         <div class="card-title">Membros da família</div>
         <div id="membros-list"></div>
@@ -718,339 +311,6 @@
   </main>
 </div>
 
-<script>
-  const COLORS = ['#c9a96e','#6aaa84','#6b9fd4','#d4665a','#a78bda','#e07b9a','#5bbcb0','#e8985e'];
-  const MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
-  let state = {
-    membros: [{ id: 1, nome: 'Eu', cor: '#c9a96e' }],
-    gastos: [],
-    parcelas: [],
-    viewMonth: null,
-    selectedColor: '#c9a96e'
-  };
-
-  // Persist to localStorage
-  function save() {
-    localStorage.setItem('financas-familiar', JSON.stringify({
-      membros: state.membros,
-      gastos: state.gastos,
-      parcelas: state.parcelas
-    }));
-  }
-
-  function load() {
-    try {
-      const d = JSON.parse(localStorage.getItem('financas-familiar') || '{}');
-      if (d.membros) state.membros = d.membros;
-      if (d.gastos) state.gastos = d.gastos;
-      if (d.parcelas) state.parcelas = d.parcelas;
-    } catch(e) {}
-  }
-
-  function curYM() {
-    const d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-  }
-
-  function addMonths(ym, n) {
-    const [y, m] = ym.split('-').map(Number);
-    const d = new Date(y, m - 1 + n, 1);
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-  }
-
-  function monthLabel(ym) {
-    const [y, m] = ym.split('-');
-    return MONTHS_PT[+m - 1] + ' ' + y;
-  }
-
-  function monthDiff(a, b) {
-    const [ay, am] = a.split('-').map(Number);
-    const [by, bm] = b.split('-').map(Number);
-    return (by - ay) * 12 + (bm - am);
-  }
-
-  function fmt(v) {
-    return 'R$ ' + Number(v).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  }
-
-  function getMembro(id) {
-    return state.membros.find(m => m.id === id) || { nome: '?', cor: '#888' };
-  }
-
-  function avatar(m, size) {
-    size = size || 32;
-    const fs = Math.round(size * 0.38);
-    return `<div class="avatar" style="width:${size}px;height:${size}px;font-size:${fs}px;background:${m.cor}22;color:${m.cor};border:1.5px solid ${m.cor}55">${m.nome[0].toUpperCase()}</div>`;
-  }
-
-  function parcelasDoMes(ym) {
-    return state.parcelas.filter(p => {
-      const fim = addMonths(p.inicio, p.total - p.atual);
-      return ym >= p.inicio && ym <= fim && !p.pago;
-    }).map(p => {
-      const parcAtual = Math.min(p.atual + monthDiff(p.inicio, ym), p.total);
-      return { ...p, parcelaAtual: parcAtual, valorParcela: +(p.totalVal / p.total).toFixed(2) };
-    });
-  }
-
-  function gastosDoMes(ym) {
-    return state.gastos.filter(g => g.mes === ym);
-  }
-
-  function showPage(name, btn) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('page-' + name).classList.add('active');
-    if (btn) btn.classList.add('active');
-    renderAll();
-  }
-
-  function changeMonth(d) {
-    state.viewMonth = addMonths(state.viewMonth, d);
-    document.getElementById('month-label').textContent = monthLabel(state.viewMonth);
-    document.getElementById('resumo-sub').textContent = 'Visão geral de ' + monthLabel(state.viewMonth);
-    renderAll();
-  }
-
-  function renderMetrics() {
-    const ym = state.viewMonth;
-    const gs = gastosDoMes(ym);
-    const ps = parcelasDoMes(ym);
-    const totalG = gs.reduce((s, g) => s + g.valor, 0);
-    const totalP = ps.reduce((s, p) => s + p.valorParcela, 0);
-    const total = totalG + totalP;
-    const items = gs.length + ps.length;
-    const metrics = [
-      { label: 'Gastos avulsos', val: fmt(totalG), cls: '' },
-      { label: 'Em parcelas', val: fmt(totalP), cls: 'c-gold' },
-      { label: 'Total do mês', val: fmt(total), cls: 'c-red' },
-      { label: 'Registros', val: items, cls: '' },
-    ];
-    document.getElementById('metrics').innerHTML = metrics.map((m, i) =>
-      `<div class="metric" style="animation-delay:${i * 0.05}s">
-        <div class="metric-label">${m.label}</div>
-        <div class="metric-val ${m.cls}">${m.val}</div>
-      </div>`
-    ).join('');
-  }
-
-  function renderByMember() {
-    const ym = state.viewMonth;
-    const gs = gastosDoMes(ym);
-    const ps = parcelasDoMes(ym);
-    const totais = {};
-    state.membros.forEach(m => { totais[m.id] = 0; });
-    gs.forEach(g => { if (totais[g.membroId] !== undefined) totais[g.membroId] += g.valor; });
-    ps.forEach(p => { if (totais[p.membroId] !== undefined) totais[p.membroId] += p.valorParcela; });
-    const max = Math.max(...Object.values(totais), 1);
-    const el = document.getElementById('by-member');
-    if (!state.membros.length) { el.innerHTML = '<div class="empty">Nenhum membro</div>'; return; }
-    el.innerHTML = state.membros.map(m =>
-      `<div class="member-bar">
-        ${avatar(m)}
-        <div class="member-bar-info">
-          <div class="member-bar-top">
-            <span style="font-weight:500">${m.nome}</span>
-            <span style="color:var(--text2);font-size:13px">${fmt(totais[m.id] || 0)}</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width:${Math.round((totais[m.id] || 0) / max * 100)}%;background:${m.cor}"></div>
-          </div>
-        </div>
-      </div>`
-    ).join('');
-  }
-
-  function renderParcelasResumo() {
-    const ps = parcelasDoMes(state.viewMonth);
-    const el = document.getElementById('parcelas-resumo');
-    if (!ps.length) { el.innerHTML = '<div class="empty">Sem parcelas neste mês</div>'; return; }
-    el.innerHTML = ps.map(p => {
-      const m = getMembro(p.membroId);
-      return `<div class="list-item">
-        ${avatar(m)}
-        <div class="item-main">
-          <div class="item-name">${p.desc} <span class="tag">${p.cartao || 'Cartão'}</span></div>
-          <div class="item-meta">${p.parcelaAtual}/${p.total} parcela • ${m.nome}</div>
-        </div>
-        <div class="item-val">${fmt(p.valorParcela)}</div>
-      </div>`;
-    }).join('');
-  }
-
-  function renderGastos() {
-    const el = document.getElementById('gastos-list');
-    if (!state.gastos.length) { el.innerHTML = '<div class="empty">Nenhum gasto ainda. Adicione o primeiro!</div>'; return; }
-    const sorted = [...state.gastos].reverse();
-    el.innerHTML = sorted.map((g, i) => {
-      const m = getMembro(g.membroId);
-      const ri = state.gastos.length - 1 - i;
-      return `<div class="list-item">
-        ${avatar(m)}
-        <div class="item-main">
-          <div class="item-name">${g.desc} <span class="tag">${g.cat}</span></div>
-          <div class="item-meta">${monthLabel(g.mes)} • ${m.nome}</div>
-        </div>
-        <div class="item-val">${fmt(g.valor)}</div>
-        <button class="btn btn-danger btn-sm" onclick="delGasto(${ri})">✕</button>
-      </div>`;
-    }).join('');
-  }
-
-  function renderParcelas() {
-    const el = document.getElementById('parcelas-list');
-    if (!state.parcelas.length) { el.innerHTML = '<div class="empty">Nenhuma parcela cadastrada</div>'; return; }
-    el.innerHTML = state.parcelas.map((p, i) => {
-      const m = getMembro(p.membroId);
-      const fimMes = addMonths(p.inicio, p.total - p.atual);
-      const prog = Math.round(p.atual / p.total * 100);
-      const badge = p.pago
-        ? `<span class="badge badge-green">Quitado</span>`
-        : `<span class="badge badge-gold">Ativo</span>`;
-      return `<div class="parcela-card">
-        <div class="parcela-top">
-          ${avatar(m)}
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:500;font-size:13px">${p.desc} ${badge}</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:2px">${p.cartao || 'Cartão'} • ${m.nome} • termina ${monthLabel(fimMes)}</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0">
-            <div style="font-weight:500;font-size:13px">${fmt(p.totalVal / p.total)}<span style="color:var(--text3);font-size:10px">/mês</span></div>
-            <div style="font-size:10px;color:var(--text3)">${fmt(p.totalVal)} total</div>
-          </div>
-        </div>
-        <div style="margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px">
-            <span>${p.atual} de ${p.total} parcelas pagas</span>
-            <span>${prog}%</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width:${prog}%;background:var(--green)"></div>
-          </div>
-        </div>
-        <div class="parcela-actions" style="justify-content:flex-end">
-          <button class="btn btn-sm" onclick="togglePago(${i})">${p.pago ? 'Reativar' : 'Marcar quitado'}</button>
-          <button class="btn btn-danger btn-sm" onclick="delParcela(${i})">Remover</button>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  function renderMembros() {
-    const el = document.getElementById('membros-list');
-    el.innerHTML = state.membros.length
-      ? state.membros.map((m, i) =>
-          `<div class="list-item">
-            ${avatar(m, 40)}
-            <div class="item-main"><div class="item-name">${m.nome}</div></div>
-            ${i > 0 ? `<button class="btn btn-danger btn-sm" onclick="delMembro(${i})">Remover</button>` : '<span class="badge badge-gold">Principal</span>'}
-          </div>`
-        ).join('')
-      : '<div class="empty">Nenhum membro</div>';
-
-    // Update selects
-    ['g-membro', 'p-membro'].forEach(id => {
-      const s = document.getElementById(id);
-      if (s) {
-        const v = s.value;
-        s.innerHTML = state.membros.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
-        s.value = v;
-      }
-    });
-  }
-
-  function renderColorOptions() {
-    const el = document.getElementById('color-options');
-    if (!el) return;
-    el.innerHTML = COLORS.map(c =>
-      `<div class="color-opt ${state.selectedColor === c ? 'selected' : ''}"
-        style="background:${c}"
-        onclick="selectColor('${c}')"></div>`
-    ).join('');
-  }
-
-  function selectColor(c) {
-    state.selectedColor = c;
-    document.getElementById('m-cor').value = c;
-    renderColorOptions();
-  }
-
-  function renderAll() {
-    renderMetrics();
-    renderByMember();
-    renderParcelasResumo();
-    renderGastos();
-    renderParcelas();
-    renderMembros();
-    renderColorOptions();
-  }
-
-  function addGasto() {
-    const desc = document.getElementById('g-desc').value.trim();
-    const val = parseFloat(document.getElementById('g-val').value);
-    const membroId = +document.getElementById('g-membro').value;
-    const cat = document.getElementById('g-cat').value;
-    const mes = document.getElementById('g-mes').value || state.viewMonth;
-    if (!desc || isNaN(val) || val <= 0) return alert('Preencha a descrição e um valor válido.');
-    state.gastos.push({ desc, valor: val, membroId, cat, mes });
-    document.getElementById('g-desc').value = '';
-    document.getElementById('g-val').value = '';
-    save();
-    renderAll();
-  }
-
-  function addParcela() {
-    const desc = document.getElementById('p-desc').value.trim();
-    const totalVal = parseFloat(document.getElementById('p-total').value);
-    const total = parseInt(document.getElementById('p-num').value);
-    const atual = parseInt(document.getElementById('p-atual').value) || 1;
-    const membroId = +document.getElementById('p-membro').value;
-    const cartao = document.getElementById('p-cartao').value.trim();
-    const inicio = document.getElementById('p-inicio').value || state.viewMonth;
-    if (!desc || isNaN(totalVal) || isNaN(total)) return alert('Preencha todos os campos obrigatórios.');
-    state.parcelas.push({ desc, totalVal, total, atual, membroId, cartao, inicio, pago: false });
-    document.getElementById('p-desc').value = '';
-    document.getElementById('p-total').value = '';
-    document.getElementById('p-num').value = '';
-    document.getElementById('p-cartao').value = '';
-    save();
-    renderAll();
-    showPage('parcelas', document.querySelector('.nav-btn:nth-child(3)'));
-  }
-
-  function addMembro() {
-    const nome = document.getElementById('m-nome').value.trim();
-    const cor = document.getElementById('m-cor').value || '#c9a96e';
-    if (!nome) return alert('Informe o nome do membro.');
-    state.membros.push({ id: Date.now(), nome, cor });
-    document.getElementById('m-nome').value = '';
-    save();
-    renderAll();
-  }
-
-  function delGasto(i) { if (confirm('Remover este gasto?')) { state.gastos.splice(i, 1); save(); renderAll(); } }
-  function delParcela(i) { if (confirm('Remover esta parcela?')) { state.parcelas.splice(i, 1); save(); renderAll(); } }
-  function togglePago(i) { state.parcelas[i].pago = !state.parcelas[i].pago; save(); renderAll(); }
-  function delMembro(i) {
-    if (!confirm('Remover membro e todos os seus registros?')) return;
-    const m = state.membros[i];
-    state.membros.splice(i, 1);
-    state.gastos = state.gastos.filter(g => g.membroId !== m.id);
-    state.parcelas = state.parcelas.filter(p => p.membroId !== m.id);
-    save();
-    renderAll();
-  }
-
-  // Init
-  load();
-  state.viewMonth = curYM();
-  document.getElementById('month-label').textContent = monthLabel(state.viewMonth);
-  document.getElementById('resumo-sub').textContent = 'Visão geral de ' + monthLabel(state.viewMonth);
-  document.getElementById('g-mes').value = curYM();
-  document.getElementById('p-inicio').value = curYM();
-  state.selectedColor = COLORS[0];
-  renderAll();
-</script>
+<script src="assets/js/app.js"></script>
 </body>
 </html>
