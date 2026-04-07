@@ -16,17 +16,17 @@ const MONTHS_PT = [
 ];
 const CHART_COLORS = ["#c9a96e", "#6aaa84", "#6b9fd4", "#d4665a", "#a78bda", "#5bbcb0", "#e8985e"];
 const BANKS = [
-  { id: "nubank", nome: "Nubank", icon: "fas fa-credit-card", color: "#820ad1" },
-  { id: "mercado-pago", nome: "Mercado Pago", icon: "fas fa-square", color: "#4299c3" },
-  { id: "bradesco", nome: "Bradesco", icon: "fas fa-building-columns", color: "#c41e3a" },
-  { id: "itau", nome: "Itaú", icon: "fas fa-building-columns", color: "#ec7000" },
-  { id: "santander", nome: "Santander", icon: "fas fa-building-columns", color: "#e41e23" },
-  { id: "banco-do-brasil", nome: "Banco do Brasil", icon: "fas fa-building-columns", color: "#ffd700" },
-  { id: "caixa", nome: "Caixa", icon: "fas fa-building-columns", color: "#003da5" },
-  { id: "inter", nome: "Inter", icon: "fas fa-mobile", color: "#ff6b00" },
-  { id: "c6", nome: "C6 Bank", icon: "fas fa-credit-card", color: "#f5f5f5" },
-  { id: "picpay", nome: "PicPay", icon: "fas fa-mobile", color: "#2eb3e6" },
-  { id: "outro", nome: "Outro", icon: "fas fa-credit-card", color: "#888" },
+  { id: "nubank", nome: "Nubank", image: "assets/images/banks/nubank.png" },
+  { id: "mercado-pago", nome: "Mercado Pago", image: "assets/images/banks/mercado-pago.png" },
+  { id: "bradesco", nome: "Bradesco", image: "assets/images/banks/bradesco.png" },
+  { id: "itau", nome: "Itaú", image: "assets/images/banks/itau.png" },
+  { id: "santander", nome: "Santander", image: "assets/images/banks/santander.png" },
+  { id: "banco-do-brasil", nome: "Banco do Brasil", image: "assets/images/banks/banco-do-brasil.png" },
+  { id: "caixa", nome: "Caixa", image: "assets/images/banks/caixa.png" },
+  { id: "inter", nome: "Inter", image: "assets/images/banks/inter.png" },
+  { id: "c6", nome: "C6 Bank", image: "assets/images/banks/c6.png" },
+  { id: "picpay", nome: "PicPay", image: "assets/images/banks/picpay.png" },
+  { id: "outro", nome: "Outro", image: "assets/images/banks/nubank.png" },
 ];
 
 let chartResizeTimer = null;
@@ -159,7 +159,7 @@ function cardLabelById(cardId, fallbackText) {
     const card = getCartao(Number(cardId));
     if (card) {
       const bank = findBank(card.bancoId);
-      return `<i class="${bank.icon}" style="color: ${bank.color}; margin-right: 6px;"></i>${cardName(card)}`;
+      return `<img src="${bank.image}" alt="${bank.nome}" class="bank-img" style="display: inline-block; margin-right: 6px;"> ${cardName(card)}`;
     }
   }
   if (fallbackText) return `<i class="fas fa-credit-card" style="margin-right: 6px;"></i>${fallbackText}`;
@@ -375,7 +375,7 @@ function chargesByCard(ym) {
 function populateBankSelect() {
   const select = document.getElementById("c-banco");
   if (!select) return;
-  select.innerHTML = BANKS.map((bank) => `<option value="${bank.id}">${bank.icon} ${bank.nome}</option>`).join("");
+  select.innerHTML = BANKS.map((bank) => `<option value="${bank.id}">${bank.nome}</option>`).join("");
 }
 
 function renderMemberSelects() {
@@ -654,7 +654,7 @@ function renderCartoes() {
       return `<div class="card-item">
         <div class="card-item-top">
           <div class="bank-chip">
-            <span class="bank-icon" data-bank="${card.bancoId}"><i class="${bank.icon}" style="color: ${bank.color};"></i></span>
+            <span class="bank-icon" data-bank="${card.bancoId}"><img src="${bank.image}" alt="${bank.nome}" class="bank-img"></span>
             <div class="item-main">
               <div class="item-name">${cardName(card)}</div>
               <div class="item-meta">${bank.nome}</div>
