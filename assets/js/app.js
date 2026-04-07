@@ -787,6 +787,9 @@ function syncMonthUI() {
   const monthLabelTablet = document.getElementById("tablet-month-label");
   if (monthLabelTablet) monthLabelTablet.textContent = label;
 
+  const monthLabelMobile = document.getElementById("mobile-month-label");
+  if (monthLabelMobile) monthLabelMobile.textContent = label;
+
   const resumoSub = document.getElementById("resumo-sub");
   if (resumoSub) resumoSub.textContent = "Visão geral de " + label;
 }

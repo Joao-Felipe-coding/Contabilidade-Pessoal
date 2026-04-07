@@ -669,6 +669,10 @@ select option {
   display: none;
 }
 
+.mobile-month-tools {
+  display: none;
+}
+
 button:focus-visible,
 summary:focus-visible,
 input:focus-visible,
@@ -1160,15 +1164,21 @@ a:focus-visible {
   }
 
   .metrics {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 12px;
   }
 
-  .metric {
-    flex: 1 1 210px;
-    max-width: 280px;
+  .metrics .metric {
+    max-width: none;
+  }
+
+  .metrics .metric:nth-child(-n + 3) {
+    grid-column: span 2;
+  }
+
+  .metrics .metric:nth-child(n + 4) {
+    grid-column: span 3;
   }
 
   .two-col {
@@ -1224,6 +1234,59 @@ a:focus-visible {
 }
 
 @media (max-width: 600px) {
+  .mobile-month-tools {
+    position: sticky;
+    top: 8px;
+    z-index: 145;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: min(420px, calc(100% - 24px));
+    margin: 10px auto 0;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(24, 24, 24, 0.94);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  .mobile-month-label {
+    min-width: 118px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .mobile-month-btn,
+  .mobile-month-reset {
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 12px;
+    line-height: 1;
+    height: 32px;
+    padding: 0 10px;
+  }
+
+  .mobile-month-btn {
+    width: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-month-btn:hover,
+  .mobile-month-reset:hover {
+    border-color: var(--accent);
+    color: var(--accent2);
+    background: var(--accent-dim);
+  }
+
   .card-collapse-toggle {
     padding: 14px 16px;
   }
@@ -1566,7 +1629,7 @@ textarea:focus {
   }
 
   .page-header {
-    padding: 16px 16px;
+    padding: 0;
   }
 
   .page-title {
@@ -1578,16 +1641,22 @@ textarea:focus {
   }
 
   .metrics {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 10px;
-    padding: 0 16px;
+    padding: 0;
   }
 
-  .metric {
-    flex: 1 1 150px;
-    max-width: 220px;
+  .metrics .metric {
+    max-width: none;
+  }
+
+  .metrics .metric:nth-child(-n + 3) {
+    grid-column: span 2;
+  }
+
+  .metrics .metric:nth-child(n + 4) {
+    grid-column: span 3;
   }
 
   .metric-item {
@@ -1868,6 +1937,16 @@ body.modal-open {
     min-width: unset;
     max-width: unset;
     width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metrics .metric {
+    grid-column: span 1 !important;
   }
 }
 
