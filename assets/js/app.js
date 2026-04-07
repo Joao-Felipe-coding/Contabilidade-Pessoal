@@ -1256,4 +1256,28 @@ function showPageWithMenuClose(pageName, btn) {
   }
 }
 
+/* ===== Bottom Navigation (Mobile) ===== */
+function navigatePage(pageName, btn) {
+  // Mudar página
+  showPage(pageName, null);
+  
+  // Atualizar ícone ativo na bottom-nav
+  const navItems = document.querySelectorAll('.bottom-nav-item');
+  navItems.forEach(item => {
+    item.classList.remove('active');
+    if (item.dataset.page === pageName) {
+      item.classList.add('active');
+    }
+  });
+  
+  // Também atualizar sidebar em desktop
+  const sidebarBtns = document.querySelectorAll('.nav-btn');
+  sidebarBtns.forEach(b => {
+    b.classList.remove('active');
+    if (b.dataset.page === pageName) {
+      b.classList.add('active');
+    }
+  });
+}
+
 init();

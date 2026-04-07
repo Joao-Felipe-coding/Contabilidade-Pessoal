@@ -771,8 +771,25 @@ select option {
 }
 
 @media (max-width: 600px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
   .sidebar {
-    flex-direction: column;
+    display: none;
+  }
+
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  .main {
+    width: 100%;
+    padding-bottom: 90px;
+  }
+
+  .bottom-nav {
+    display: flex;
   }
 
   .nav {
@@ -1111,5 +1128,90 @@ textarea:focus {
   .nav-icon {
     width: 16px;
     height: 16px;
+  }
+
+  /* ===== Bottom Navigation Bar (Mobile) ===== */
+  .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 340px;
+    height: 60px;
+    background: rgba(24, 24, 24, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    z-index: 150;
+    padding: 0 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .bottom-nav-item {
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .bottom-nav-item svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    fill: none;
+  }
+
+  .bottom-nav-item:hover {
+    background: var(--accent-dim);
+    color: var(--accent);
+    transform: scale(1.1);
+  }
+
+  .bottom-nav-item.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-dim);
+  }
+
+  .bottom-nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  /* Desktop: esconder bottom-nav, mostrar sidebar normal */
+  @media (min-width: 601px) {
+    .bottom-nav {
+      display: none;
+    }
+
+    .shell {
+      grid-template-columns: 220px 1fr;
+    }
+
+    .sidebar {
+      position: static;
+      transform: none;
+    }
   }
 }
