@@ -1,4 +1,4 @@
-const CACHE_VERSION = "ninos-financas-v1";
+const CACHE_VERSION = "ninos-financas-v2";
 
 const CORE_ASSETS = [
   "./",
