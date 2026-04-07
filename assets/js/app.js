@@ -172,6 +172,19 @@ function showToast(message, type) {
   }, 2800);
 }
 
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+
+  const isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  if (!window.isSecureContext && !isLocalHost) return;
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error) => {
+      console.warn("Falha ao registrar service worker:", error);
+    });
+  });
+}
+
 function formatDateBR(isoDate) {
   if (!isoDate || !/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) return "-";
   const [y, m, d] = isoDate.split("-");
@@ -1934,4 +1947,5 @@ function navigatePage(pageName, btn) {
   });
 }
 
+registerServiceWorker();
 init();
