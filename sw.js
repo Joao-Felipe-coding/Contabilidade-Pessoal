@@ -1,4 +1,4 @@
-const CACHE_VERSION = "ninos-financas-v2";
+const CACHE_VERSION = "ninos-financas-v3";
 
 const CORE_ASSETS = [
   "./",
@@ -6,6 +6,10 @@ const CORE_ASSETS = [
   "./manifest.webmanifest",
   "./assets/css/main.css",
   "./assets/js/app.js",
+  "./assets/icons/favicon.svg",
+  "./assets/icons/favicon-32.png",
+  "./assets/icons/favicon-16.png",
+  "./assets/icons/favicon.ico",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
   "./assets/icons/apple-touch-icon.png"
