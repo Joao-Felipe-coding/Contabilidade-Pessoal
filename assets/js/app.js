@@ -16,17 +16,17 @@ const MONTHS_PT = [
 ];
 const CHART_COLORS = ["#c9a96e", "#6aaa84", "#6b9fd4", "#d4665a", "#a78bda", "#5bbcb0", "#e8985e"];
 const BANKS = [
-  { id: "nubank", nome: "Nubank", image: "assets/images/banks/nubank.svg" },
-  { id: "mercado-pago", nome: "Mercado Pago", image: "assets/images/banks/mercado-pago.svg" },
-  { id: "bradesco", nome: "Bradesco", image: "assets/images/banks/bradesco.svg" },
-  { id: "itau", nome: "Itaú", image: "assets/images/banks/itau.svg" },
-  { id: "santander", nome: "Santander", image: "assets/images/banks/santander.svg" },
-  { id: "banco-do-brasil", nome: "Banco do Brasil", image: "assets/images/banks/banco-do-brasil.svg" },
-  { id: "caixa", nome: "Caixa", image: "assets/images/banks/caixa.svg" },
-  { id: "inter", nome: "Inter", image: "assets/images/banks/inter.svg" },
-  { id: "c6", nome: "C6 Bank", image: "assets/images/banks/c6.svg" },
-  { id: "picpay", nome: "PicPay", image: "assets/images/banks/picpay.svg" },
-  { id: "outro", nome: "Outro", image: "assets/images/banks/nubank.svg" },
+  { id: "nubank", nome: "Nubank", color: "#820ad1" },
+  { id: "mercado-pago", nome: "Mercado Pago", color: "#4299c3" },
+  { id: "bradesco", nome: "Bradesco", color: "#c41e3a" },
+  { id: "itau", nome: "Itaú", color: "#ec7000" },
+  { id: "santander", nome: "Santander", color: "#e41e23" },
+  { id: "banco-do-brasil", nome: "Banco do Brasil", color: "#ffd700" },
+  { id: "caixa", nome: "Caixa", color: "#003da5" },
+  { id: "inter", nome: "Inter", color: "#ff6b00" },
+  { id: "c6", nome: "C6 Bank", color: "#1a1a1a" },
+  { id: "picpay", nome: "PicPay", color: "#2eb3e6" },
+  { id: "outro", nome: "Outro", color: "#888" },
 ];
 
 let chartResizeTimer = null;
@@ -159,11 +159,11 @@ function cardLabelById(cardId, fallbackText) {
     const card = getCartao(Number(cardId));
     if (card) {
       const bank = findBank(card.bancoId);
-      return `<img src="${bank.image}" alt="${bank.nome}" class="bank-img" style="display: inline-block; margin-right: 6px;"> ${cardName(card)}`;
+      return `<span class="bank-dot" style="background-color: ${bank.color};"></span> ${cardName(card)}`;
     }
   }
-  if (fallbackText) return `💳 ${fallbackText}`;
-  return "💳 Cartão";
+  if (fallbackText) return `<span class="bank-dot" style="background-color: #888;"></span> ${fallbackText}`;
+  return `<span class="bank-dot" style="background-color: #888;"></span> Cartão`;
 }
 
 function getMembro(id) {
@@ -654,7 +654,7 @@ function renderCartoes() {
       return `<div class="card-item">
         <div class="card-item-top">
           <div class="bank-chip">
-            <span class="bank-icon" data-bank="${card.bancoId}"><img src="${bank.image}" alt="${bank.nome}" class="bank-img"></span>
+            <span class="bank-icon" style="background-color: ${bank.color};"></span>
             <div class="item-main">
               <div class="item-name">${cardName(card)}</div>
               <div class="item-meta">${bank.nome}</div>

@@ -601,22 +601,17 @@ select option {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface2);
   border: 1px solid var(--border2);
-  font-size: 14px;
   flex-shrink: 0;
-  overflow: hidden;
 }
 
-.bank-icon i {
-  font-size: 16px;
-}
-
-.bank-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 2px;
+.bank-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
 }
 
 .card-summary-grid {
