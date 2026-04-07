@@ -1192,37 +1192,53 @@ function delMembro(index) {
 }
 
 function init() {
-  load();
-  populateBankSelect();
+  try {
+    load();
+    populateBankSelect();
 
-  state.viewMonth = curYM();
-  document.getElementById("month-label").textContent = monthLabel(state.viewMonth);
-  document.getElementById("resumo-sub").textContent = "Visão geral de " + monthLabel(state.viewMonth);
+    state.viewMonth = curYM();
+    document.getElementById("month-label").textContent = monthLabel(state.viewMonth);
+    document.getElementById("resumo-sub").textContent = "Visão geral de " + monthLabel(state.viewMonth);
 
-  document.getElementById("g-mes").value = curYM();
-  document.getElementById("p-inicio").value = curYM();
-  document.getElementById("c-fechamento").value = "7";
-  document.getElementById("c-vencimento").value = "15";
+    document.getElementById("g-mes").value = curYM();
+    document.getElementById("p-inicio").value = curYM();
+    document.getElementById("c-fechamento").value = "7";
+    document.getElementById("c-vencimento").value = "15";
 
-  document.getElementById("g-forma").addEventListener("change", toggleGastoCartaoField);
+    document.getElementById("g-forma").addEventListener("change", toggleGastoCartaoField);
 
-  window.addEventListener("resize", () => {
-    clearTimeout(chartResizeTimer);
-    chartResizeTimer = setTimeout(() => {
-      renderCharts();
-    }, 120);
-  });
+    window.addEventListener("resize", () => {
+      clearTimeout(chartResizeTimer);
+      chartResizeTimer = setTimeout(() => {
+        renderCharts();
+      }, 120);
+    });
 
-  state.selectedColor = COLORS[0];
-  renderAll();
+    state.selectedColor = COLORS[0];
+    try {
+      renderAll();
+    } catch (renderErr) {
+      console.error("Erro ao renderizar:", renderErr);
+    }
+  } catch (initErr) {
+    console.error("Erro ao inicializar:", initErr);
+  }
 
-  // Esconder loading screen após 1.2s
+  // Esconder loading screen após 1.2s (com fallback)
   setTimeout(() => {
     const loadingScreen = document.getElementById("loading-screen");
     if (loadingScreen) {
       loadingScreen.classList.add("hidden");
     }
   }, 1200);
+
+  // Fallback: garantir que a tela de carregamento seja removida em 3s mesmo com erros
+  setTimeout(() => {
+    const loadingScreen = document.getElementById("loading-screen");
+    if (loadingScreen) {
+      loadingScreen.style.display = "none";
+    }
+  }, 3000);
 }
 
 /* ===== Menu Hambúrguer ===== */
