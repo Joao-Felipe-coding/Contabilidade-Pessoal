@@ -16,17 +16,17 @@ const MONTHS_PT = [
 ];
 const CHART_COLORS = ["#c9a96e", "#6aaa84", "#6b9fd4", "#d4665a", "#a78bda", "#5bbcb0", "#e8985e"];
 const BANKS = [
-  { id: "nubank", nome: "Nubank", image: "assets/images/banks/nubank.png" },
-  { id: "mercado-pago", nome: "Mercado Pago", image: "assets/images/banks/mercado-pago.png" },
-  { id: "bradesco", nome: "Bradesco", image: "assets/images/banks/bradesco.png" },
-  { id: "itau", nome: "Itaú", image: "assets/images/banks/itau.png" },
-  { id: "santander", nome: "Santander", image: "assets/images/banks/santander.png" },
-  { id: "banco-do-brasil", nome: "Banco do Brasil", image: "assets/images/banks/banco-do-brasil.png" },
-  { id: "caixa", nome: "Caixa", image: "assets/images/banks/caixa.png" },
-  { id: "inter", nome: "Inter", image: "assets/images/banks/inter.png" },
-  { id: "c6", nome: "C6 Bank", image: "assets/images/banks/c6.png" },
-  { id: "picpay", nome: "PicPay", image: "assets/images/banks/picpay.png" },
-  { id: "outro", nome: "Outro", image: "assets/images/banks/nubank.png" },
+  { id: "nubank", nome: "Nubank", image: "assets/images/banks/nubank.svg" },
+  { id: "mercado-pago", nome: "Mercado Pago", image: "assets/images/banks/mercado-pago.svg" },
+  { id: "bradesco", nome: "Bradesco", image: "assets/images/banks/bradesco.svg" },
+  { id: "itau", nome: "Itaú", image: "assets/images/banks/itau.svg" },
+  { id: "santander", nome: "Santander", image: "assets/images/banks/santander.svg" },
+  { id: "banco-do-brasil", nome: "Banco do Brasil", image: "assets/images/banks/banco-do-brasil.svg" },
+  { id: "caixa", nome: "Caixa", image: "assets/images/banks/caixa.svg" },
+  { id: "inter", nome: "Inter", image: "assets/images/banks/inter.svg" },
+  { id: "c6", nome: "C6 Bank", image: "assets/images/banks/c6.svg" },
+  { id: "picpay", nome: "PicPay", image: "assets/images/banks/picpay.svg" },
+  { id: "outro", nome: "Outro", image: "assets/images/banks/nubank.svg" },
 ];
 
 let chartResizeTimer = null;
@@ -162,8 +162,8 @@ function cardLabelById(cardId, fallbackText) {
       return `<img src="${bank.image}" alt="${bank.nome}" class="bank-img" style="display: inline-block; margin-right: 6px;"> ${cardName(card)}`;
     }
   }
-  if (fallbackText) return `<i class="fas fa-credit-card" style="margin-right: 6px;"></i>${fallbackText}`;
-  return `<i class="fas fa-credit-card" style="margin-right: 6px;"></i>Cartão`;
+  if (fallbackText) return `💳 ${fallbackText}`;
+  return "💳 Cartão";
 }
 
 function getMembro(id) {
