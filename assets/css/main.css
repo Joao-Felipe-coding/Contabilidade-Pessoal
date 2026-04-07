@@ -1467,6 +1467,53 @@ textarea:focus {
   pointer-events: none;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.58);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1300;
+}
+
+.confirm-modal.active {
+  display: flex;
+}
+
+.confirm-card {
+  width: min(420px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+  padding: 16px;
+}
+
+.confirm-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.confirm-message {
+  margin-top: 8px;
+  color: var(--text2);
+  font-size: 13px;
+}
+
+.confirm-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .toast {
   min-width: 220px;
   max-width: 320px;

@@ -172,6 +172,61 @@ function showToast(message, type) {
   }, 2800);
 }
 
+function openConfirmDialog(message, onConfirm) {
+  const modal = document.getElementById("confirm-modal");
+  const messageEl = document.getElementById("confirm-message");
+  const okButton = document.getElementById("confirm-ok");
+  const cancelButton = document.getElementById("confirm-cancel");
+
+  if (!modal || !messageEl || !okButton || !cancelButton) {
+    if (window.confirm(message) && typeof onConfirm === "function") {
+      onConfirm();
+    }
+    return;
+  }
+
+  if (modal.classList.contains("active")) return;
+
+  messageEl.textContent = message;
+
+  const close = (confirmed) => {
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+
+    document.removeEventListener("keydown", onKeyDown);
+    modal.removeEventListener("click", onBackdropClick);
+    okButton.removeEventListener("click", onOkClick);
+    cancelButton.removeEventListener("click", onCancelClick);
+
+    if (confirmed && typeof onConfirm === "function") {
+      onConfirm();
+    }
+  };
+
+  const onOkClick = () => close(true);
+  const onCancelClick = () => close(false);
+  const onBackdropClick = (event) => {
+    if (event.target === modal) close(false);
+  };
+  const onKeyDown = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      close(false);
+    }
+  };
+
+  document.addEventListener("keydown", onKeyDown);
+  modal.addEventListener("click", onBackdropClick);
+  okButton.addEventListener("click", onOkClick);
+  cancelButton.addEventListener("click", onCancelClick);
+
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+  okButton.focus();
+}
+
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
@@ -359,6 +414,7 @@ function migrateState() {
         if (forma !== "Crédito") cartaoId = null;
 
         return {
+          id: Number(raw?.id) || uid(),
           desc: String(raw?.desc || "").trim(),
           valor: Number.isFinite(Number(raw?.valor)) ? Number(raw.valor) : 0,
           membroId: Number(raw?.membroId) || state.membros[0].id,
@@ -382,6 +438,7 @@ function migrateState() {
         }
 
         return {
+          id: Number(raw?.id) || uid(),
           desc: String(raw?.desc || "").trim(),
           totalVal: Number.isFinite(Number(raw?.totalVal)) ? Number(raw.totalVal) : 0,
           total,
@@ -889,8 +946,7 @@ function renderGastos() {
   }
 
   const filtered = state.gastos
-    .map((gasto, index) => ({ gasto, index }))
-    .filter(({ gasto }) => {
+    .filter((gasto) => {
       const member = getMembro(gasto.membroId);
       const card = gasto.forma === "Crédito" ? cardName(getCartao(gasto.cartaoId)) : "";
       return matchQuery([gasto.desc, gasto.cat, gasto.forma, member.nome, card, monthLabel(gasto.mes)], query);
@@ -903,7 +959,7 @@ function renderGastos() {
   }
 
   root.innerHTML = filtered
-    .map(({ gasto, index }) => {
+    .map((gasto) => {
       const member = getMembro(gasto.membroId);
       const paymentInfo =
         gasto.forma === "Crédito"
@@ -917,7 +973,7 @@ function renderGastos() {
           <div class="item-meta">${monthLabel(gasto.mes)} • ${member.nome} • ${paymentInfo}</div>
         </div>
         <div class="item-val">${fmt(gasto.valor)}</div>
-        <button class="btn btn-danger btn-sm" onclick="delGasto(${index})">✕</button>
+        <button class="btn btn-danger btn-sm" onclick="delGasto(${gasto.id})" aria-label="Remover gasto">✕</button>
       </div>`;
     })
     .join("");
@@ -932,9 +988,7 @@ function renderParcelas() {
     return;
   }
 
-  const filtered = state.parcelas
-    .map((parcela, index) => ({ parcela, index }))
-    .filter(({ parcela }) => {
+  const filtered = state.parcelas.filter((parcela) => {
       const member = getMembro(parcela.membroId);
       const card = parcela.cartaoId ? cardName(getCartao(parcela.cartaoId)) : parcela.cartao || "Cartão";
       return matchQuery([parcela.desc, member.nome, card], query);
@@ -946,7 +1000,7 @@ function renderParcelas() {
   }
 
   root.innerHTML = filtered
-    .map(({ parcela, index }) => {
+    .map((parcela) => {
       const member = getMembro(parcela.membroId);
       const endMonth = addMonths(parcela.inicio, parcela.total - parcela.atual);
       const progress = Math.round((parcela.atual / parcela.total) * 100);
@@ -978,8 +1032,8 @@ function renderParcelas() {
           </div>
         </div>
         <div class="parcela-actions" style="justify-content:flex-end">
-          <button class="btn btn-sm" onclick="togglePago(${index})">${parcela.pago ? "Reativar" : "Marcar quitado"}</button>
-          <button class="btn btn-danger btn-sm" onclick="delParcela(${index})">Remover</button>
+          <button class="btn btn-sm" onclick="togglePago(${parcela.id})">${parcela.pago ? "Reativar" : "Marcar quitado"}</button>
+          <button class="btn btn-danger btn-sm" onclick="delParcela(${parcela.id})">Remover</button>
         </div>
       </div>`;
     })
@@ -998,7 +1052,7 @@ function renderCartoes() {
   const usage = chargesByCard(state.viewMonth);
 
   root.innerHTML = state.cartoes
-    .map((card, index) => {
+    .map((card) => {
       const bank = findBank(card.bancoId);
       const used = usage[card.id] || 0;
       const limit = Number(card.limiteAtual || 0);
@@ -1046,9 +1100,9 @@ function renderCartoes() {
         </div>
 
         <div class="card-actions">
-          <button class="btn btn-sm btn-primary" onclick="updateCartaoLimite(${index})">Atualizar limite</button>
-          <button class="btn btn-sm" onclick="editCartaoDatas(${index})">Editar datas</button>
-          <button class="btn btn-danger btn-sm" onclick="delCartao(${index})">Remover</button>
+          <button class="btn btn-sm btn-primary" onclick="updateCartaoLimite(${card.id})">Atualizar limite</button>
+          <button class="btn btn-sm" onclick="editCartaoDatas(${card.id})">Editar datas</button>
+          <button class="btn btn-danger btn-sm" onclick="delCartao(${card.id})">Remover</button>
         </div>
       </div>`;
     })
@@ -1066,7 +1120,7 @@ function renderMembros() {
               <div class="item-main"><div class="item-name">${member.nome}</div></div>
               ${
                 index > 0
-                  ? `<button class="btn btn-danger btn-sm" onclick="delMembro(${index})">Remover</button>`
+                  ? `<button class="btn btn-danger btn-sm" onclick="delMembro(${member.id})">Remover</button>`
                   : '<span class="badge badge-gold">Principal</span>'
               }
             </div>`
@@ -1538,6 +1592,7 @@ function addGasto() {
   }
 
   state.gastos.push({
+    id: uid(),
     desc,
     valor: val,
     membroId,
@@ -1597,6 +1652,7 @@ function addParcela() {
   }
 
   state.parcelas.push({
+    id: uid(),
     desc,
     totalVal,
     total,
@@ -1679,8 +1735,11 @@ function addCartao() {
   showToast("Cartão cadastrado com sucesso.", "success");
 }
 
-function updateCartaoLimite(index) {
-  const card = state.cartoes[index];
+function updateCartaoLimite(cardId) {
+  const parsedId = Number(cardId);
+  if (!Number.isFinite(parsedId)) return;
+
+  const card = state.cartoes.find((item) => item.id === parsedId);
   if (!card) return;
 
   const suggested = String(card.limiteAtual.toFixed(2)).replace(".", ",");
@@ -1702,8 +1761,11 @@ function updateCartaoLimite(index) {
   showToast("Limite atualizado.", "success");
 }
 
-function editCartaoDatas(index) {
-  const card = state.cartoes[index];
+function editCartaoDatas(cardId) {
+  const parsedId = Number(cardId);
+  if (!Number.isFinite(parsedId)) return;
+
+  const card = state.cartoes.find((item) => item.id === parsedId);
   if (!card) return;
 
   const fechamentoRaw = prompt(`Novo dia de fechamento para ${cardName(card)} (1-31):`, String(card.fechamentoDia));
@@ -1728,32 +1790,38 @@ function editCartaoDatas(index) {
   showToast("Datas do cartão atualizadas.", "success");
 }
 
-function delCartao(index) {
-  const card = state.cartoes[index];
+function delCartao(cardId) {
+  const parsedId = Number(cardId);
+  if (!Number.isFinite(parsedId)) return;
+
+  const card = state.cartoes.find((item) => item.id === parsedId);
   if (!card) return;
 
   const name = cardName(card);
-  if (!confirm(`Remover o cartão ${name}? Os lançamentos continuarão salvos, mas sem vínculo com este cartão.`)) return;
+  openConfirmDialog(`Remover o cartão ${name}? Os lançamentos continuarão salvos, mas sem vínculo com este cartão.`, () => {
+    const currentIndex = state.cartoes.findIndex((item) => item.id === parsedId);
+    if (currentIndex < 0) return;
 
-  state.gastos = state.gastos.map((gasto) => {
-    if (gasto.cartaoId === card.id) {
-      return { ...gasto, cartaoId: null };
-    }
-    return gasto;
+    state.gastos = state.gastos.map((gasto) => {
+      if (gasto.cartaoId === card.id) {
+        return { ...gasto, cartaoId: null };
+      }
+      return gasto;
+    });
+
+    state.parcelas = state.parcelas.map((parcela) => {
+      if (parcela.cartaoId === card.id) {
+        return { ...parcela, cartaoId: null, cartao: name };
+      }
+      return parcela;
+    });
+
+    state.cartoes.splice(currentIndex, 1);
+
+    save();
+    renderAll();
+    showToast("Cartão removido.", "info");
   });
-
-  state.parcelas = state.parcelas.map((parcela) => {
-    if (parcela.cartaoId === card.id) {
-      return { ...parcela, cartaoId: null, cartao: name };
-    }
-    return parcela;
-  });
-
-  state.cartoes.splice(index, 1);
-
-  save();
-  renderAll();
-  showToast("Cartão removido.", "info");
 }
 
 function addMembro() {
@@ -1776,24 +1844,41 @@ function addMembro() {
   showToast("Membro adicionado.", "success");
 }
 
-function delGasto(index) {
-  if (!confirm("Remover este gasto?")) return;
-  state.gastos.splice(index, 1);
-  save();
-  renderAll();
-  showToast("Gasto removido.", "info");
+function delGasto(gastoId) {
+  const parsedId = Number(gastoId);
+  if (!Number.isFinite(parsedId)) return;
+
+  openConfirmDialog("Remover este gasto?", () => {
+    const index = state.gastos.findIndex((gasto) => gasto.id === parsedId);
+    if (index < 0) return;
+
+    state.gastos.splice(index, 1);
+    save();
+    renderAll();
+    showToast("Gasto removido.", "info");
+  });
 }
 
-function delParcela(index) {
-  if (!confirm("Remover esta parcela?")) return;
-  state.parcelas.splice(index, 1);
-  save();
-  renderAll();
-  showToast("Parcela removida.", "info");
+function delParcela(parcelaId) {
+  const parsedId = Number(parcelaId);
+  if (!Number.isFinite(parsedId)) return;
+
+  openConfirmDialog("Remover esta parcela?", () => {
+    const index = state.parcelas.findIndex((parcela) => parcela.id === parsedId);
+    if (index < 0) return;
+
+    state.parcelas.splice(index, 1);
+    save();
+    renderAll();
+    showToast("Parcela removida.", "info");
+  });
 }
 
-function togglePago(index) {
-  const parcela = state.parcelas[index];
+function togglePago(parcelaId) {
+  const parsedId = Number(parcelaId);
+  if (!Number.isFinite(parsedId)) return;
+
+  const parcela = state.parcelas.find((item) => item.id === parsedId);
   if (!parcela) return;
 
   parcela.pago = !parcela.pago;
@@ -1802,18 +1887,27 @@ function togglePago(index) {
   showToast(parcela.pago ? "Parcela marcada como quitada." : "Parcela reativada.", "info");
 }
 
-function delMembro(index) {
-  if (index === 0) return;
-  if (!confirm("Remover membro e todos os seus registros?")) return;
+function delMembro(memberId) {
+  const parsedId = Number(memberId);
+  if (!Number.isFinite(parsedId)) return;
 
-  const member = state.membros[index];
-  state.membros.splice(index, 1);
-  state.gastos = state.gastos.filter((gasto) => gasto.membroId !== member.id);
-  state.parcelas = state.parcelas.filter((parcela) => parcela.membroId !== member.id);
+  const principalId = state.membros[0]?.id;
+  if (parsedId === principalId) return;
 
-  save();
-  renderAll();
-  showToast("Membro e registros removidos.", "info");
+  openConfirmDialog("Remover membro e todos os seus registros?", () => {
+    const index = state.membros.findIndex((member) => member.id === parsedId);
+    if (index < 0) return;
+
+    const member = state.membros[index];
+
+    state.membros.splice(index, 1);
+    state.gastos = state.gastos.filter((gasto) => gasto.membroId !== member.id);
+    state.parcelas = state.parcelas.filter((parcela) => parcela.membroId !== member.id);
+
+    save();
+    renderAll();
+    showToast("Membro e registros removidos.", "info");
+  });
 }
 
 function init() {
