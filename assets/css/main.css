@@ -978,7 +978,7 @@ a:focus-visible {
 
   .main {
     width: 100%;
-    padding-bottom: 90px;
+    padding-bottom: 104px;
   }
 
   .bottom-nav {
@@ -1028,6 +1028,36 @@ a:focus-visible {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes navItemActive {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes navIndicatorPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px rgba(201, 169, 110, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(201, 169, 110, 0);
   }
 }
 
@@ -1326,39 +1356,43 @@ textarea:focus {
   /* ===== Bottom Navigation Bar (Mobile) ===== */
   .bottom-nav {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
+    gap: 8px;
     position: fixed;
     bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 32px);
-    max-width: 340px;
-    height: 60px;
-    background: rgba(24, 24, 24, 0.85);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    max-width: 360px;
+    height: 72px;
+    background: rgba(24, 24, 24, 0.92);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     border: 1px solid var(--border);
-    border-radius: 20px;
+    border-radius: 16px;
     z-index: 150;
-    padding: 0 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 8px 6px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
 
   .bottom-nav-item {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border: none;
     background: transparent;
     color: var(--text2);
     cursor: pointer;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: all 0.3s ease;
+    gap: 4px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
     position: relative;
     flex-shrink: 0;
+    padding: 6px;
   }
 
   .bottom-nav-item svg {
@@ -1366,30 +1400,39 @@ textarea:focus {
     height: 24px;
     stroke: currentColor;
     fill: none;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .bottom-nav-item:hover svg {
+    transform: scale(1.15);
+  }
+
+  .bottom-nav-item.active svg {
+    animation: navItemActive 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .bottom-nav-item:hover {
     background: var(--accent-dim);
     color: var(--accent);
-    transform: scale(1.1);
   }
 
   .bottom-nav-item.active {
     background: var(--accent-dim);
     color: var(--accent);
-    box-shadow: 0 0 12px var(--accent-dim);
+    animation: navItemActive 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .bottom-nav-item.active::after {
     content: '';
     position: absolute;
-    bottom: -2px;
+    bottom: 2px;
     left: 50%;
     transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
+    width: 3px;
+    height: 3px;
     background: var(--accent);
     border-radius: 50%;
+    animation: navIndicatorPulse 0.6s ease-out;
   }
 
   /* Desktop: esconder bottom-nav, mostrar sidebar normal */
@@ -1482,14 +1525,16 @@ textarea:focus {
   }
 
   .bottom-nav-text {
-    font-size: 9px;
+    font-size: 10px;
+    font-weight: 500;
     line-height: 1;
+    white-space: nowrap;
   }
 
   .toast-container {
     left: 16px;
     right: 16px;
-    bottom: 86px;
+    bottom: 100px;
   }
 
   .toast {
