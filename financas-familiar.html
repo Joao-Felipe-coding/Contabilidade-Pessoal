@@ -102,6 +102,52 @@
     </nav>
   </aside>
 
+  <nav class="tablet-nav" aria-label="Navegação para tablet">
+    <div class="tablet-nav-pages">
+      <button class="tablet-nav-item active" data-page="resumo" onclick="navigatePage('resumo', this)">
+        <svg class="tablet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
+          <rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/>
+        </svg>
+        <span class="tablet-nav-text">Resumo</span>
+      </button>
+      <button class="tablet-nav-item" data-page="gastos" onclick="navigatePage('gastos', this)">
+        <svg class="tablet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v7M5.5 6.5h4a1 1 0 0 1 0 2h-3a1 1 0 0 0 0 2h4"/>
+        </svg>
+        <span class="tablet-nav-text">Gastos</span>
+      </button>
+      <button class="tablet-nav-item" data-page="parcelas" onclick="navigatePage('parcelas', this)">
+        <svg class="tablet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="1.5" y="3" width="13" height="10" rx="1.5"/>
+          <path d="M1.5 6.5h13M5 10h2M9 10h2"/>
+        </svg>
+        <span class="tablet-nav-text">Parcelas</span>
+      </button>
+      <button class="tablet-nav-item" data-page="cartoes" onclick="navigatePage('cartoes', this)">
+        <svg class="tablet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/>
+          <path d="M1.5 6h13M4.5 10.5h3.5"/>
+        </svg>
+        <span class="tablet-nav-text">Cartões</span>
+      </button>
+      <button class="tablet-nav-item" data-page="membros" onclick="navigatePage('membros', this)">
+        <svg class="tablet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
+          <circle cx="12" cy="5" r="2"/><path d="M12 9c1.66 0 3 1.34 3 3"/>
+        </svg>
+        <span class="tablet-nav-text">Membros</span>
+      </button>
+    </div>
+
+    <div class="tablet-month-tools">
+      <button class="tablet-month-btn" onclick="changeMonth(-1)" aria-label="Mês anterior">&#8592;</button>
+      <span class="tablet-month-label" id="tablet-month-label"></span>
+      <button class="tablet-month-btn" onclick="changeMonth(1)" aria-label="Próximo mês">&#8594;</button>
+      <button class="tablet-month-reset" onclick="goToCurrentMonth()">Mês atual</button>
+    </div>
+  </nav>
+
   <main class="main" id="main-content" tabindex="-1">
 
     <div id="page-resumo" class="page active">

@@ -778,23 +778,40 @@ function renderCardSelects() {
   toggleGastoCartaoField();
 }
 
+function syncMonthUI() {
+  const label = monthLabel(state.viewMonth);
+
+  const monthLabelDesktop = document.getElementById("month-label");
+  if (monthLabelDesktop) monthLabelDesktop.textContent = label;
+
+  const monthLabelTablet = document.getElementById("tablet-month-label");
+  if (monthLabelTablet) monthLabelTablet.textContent = label;
+
+  const resumoSub = document.getElementById("resumo-sub");
+  if (resumoSub) resumoSub.textContent = "Visão geral de " + label;
+}
+
 function showPage(name, btn) {
   document.querySelectorAll(".page").forEach((page) => page.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach((button) => button.classList.remove("active"));
   document.querySelectorAll(".bottom-nav-item").forEach((item) => item.classList.remove("active"));
+  document.querySelectorAll(".tablet-nav-item").forEach((item) => item.classList.remove("active"));
 
   const page = document.getElementById("page-" + name);
   if (page) page.classList.add("active");
 
-  if (btn) {
-    btn.classList.add("active");
-  } else {
-    const autoBtn = document.querySelector(`.nav-btn[data-page="${name}"]`);
-    if (autoBtn) autoBtn.classList.add("active");
-  }
+  const desktopBtn = document.querySelector(`.nav-btn[data-page="${name}"]`);
+  if (desktopBtn) desktopBtn.classList.add("active");
 
   const mobileBtn = document.querySelector(`.bottom-nav-item[data-page="${name}"]`);
   if (mobileBtn) mobileBtn.classList.add("active");
+
+  const tabletBtn = document.querySelector(`.tablet-nav-item[data-page="${name}"]`);
+  if (tabletBtn) tabletBtn.classList.add("active");
+
+  if (btn && btn.classList) {
+    btn.classList.add("active");
+  }
 
   const mainContent = document.getElementById("main-content");
   if (mainContent) mainContent.focus({ preventScroll: true });
@@ -804,8 +821,7 @@ function showPage(name, btn) {
 
 function changeMonth(delta) {
   state.viewMonth = addMonths(state.viewMonth, delta);
-  document.getElementById("month-label").textContent = monthLabel(state.viewMonth);
-  document.getElementById("resumo-sub").textContent = "Visão geral de " + monthLabel(state.viewMonth);
+  syncMonthUI();
   renderAll();
 }
 
@@ -817,8 +833,7 @@ function goToCurrentMonth() {
   }
 
   state.viewMonth = now;
-  document.getElementById("month-label").textContent = monthLabel(state.viewMonth);
-  document.getElementById("resumo-sub").textContent = "Visão geral de " + monthLabel(state.viewMonth);
+  syncMonthUI();
   renderAll();
   showToast("Mês atual selecionado.", "success");
 }
@@ -1916,8 +1931,7 @@ function init() {
     populateBankSelect();
 
     state.viewMonth = curYM();
-    document.getElementById("month-label").textContent = monthLabel(state.viewMonth);
-    document.getElementById("resumo-sub").textContent = "Visão geral de " + monthLabel(state.viewMonth);
+    syncMonthUI();
 
     document.getElementById("g-mes").value = curYM();
     document.getElementById("p-inicio").value = curYM();
@@ -2019,26 +2033,7 @@ function showPageWithMenuClose(pageName, btn) {
 
 /* ===== Bottom Navigation (Mobile) ===== */
 function navigatePage(pageName, btn) {
-  // Mudar página
   showPage(pageName, null);
-  
-  // Atualizar ícone ativo na bottom-nav
-  const navItems = document.querySelectorAll('.bottom-nav-item');
-  navItems.forEach(item => {
-    item.classList.remove('active');
-    if (item.dataset.page === pageName) {
-      item.classList.add('active');
-    }
-  });
-  
-  // Também atualizar sidebar em desktop
-  const sidebarBtns = document.querySelectorAll('.nav-btn');
-  sidebarBtns.forEach(b => {
-    b.classList.remove('active');
-    if (b.dataset.page === pageName) {
-      b.classList.add('active');
-    }
-  });
 }
 
 registerServiceWorker();
