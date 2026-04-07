@@ -1028,7 +1028,8 @@ a:focus-visible {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin: 10px 16px 0;
+    width: min(980px, calc(100% - 24px));
+    margin: 10px auto 0;
     padding: 10px;
     border-radius: 14px;
     border: 1px solid var(--border);
@@ -1039,12 +1040,15 @@ a:focus-visible {
   }
 
   .tablet-nav-pages {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
   }
 
   .tablet-nav-item {
+    flex: 1 1 120px;
+    max-width: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1103,11 +1107,14 @@ a:focus-visible {
   .tablet-month-tools {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
+    flex-wrap: wrap;
   }
 
   .tablet-month-label {
-    flex: 1;
+    flex: 0 0 auto;
+    min-width: 140px;
     text-align: center;
     font-size: 13px;
     font-weight: 600;
@@ -1143,6 +1150,8 @@ a:focus-visible {
   }
 
   .main {
+    width: min(980px, 100%);
+    margin: 0 auto;
     padding: 16px 16px 24px;
   }
 
@@ -1151,7 +1160,15 @@ a:focus-visible {
   }
 
   .metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .metric {
+    flex: 1 1 210px;
+    max-width: 280px;
   }
 
   .two-col {
@@ -1164,22 +1181,15 @@ a:focus-visible {
 }
 
 @media (min-width: 601px) and (max-width: 760px) {
-  .tablet-nav-pages {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
   .tablet-nav-item {
+    flex: 1 1 calc(33.333% - 8px);
+    max-width: 220px;
     min-height: 54px;
   }
 
-  .tablet-month-tools {
-    flex-wrap: wrap;
-  }
-
   .tablet-month-label {
-    order: -1;
-    width: 100%;
-    text-align: left;
+    min-width: 120px;
+    text-align: center;
   }
 }
 
@@ -1568,9 +1578,16 @@ textarea:focus {
   }
 
   .metrics {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     padding: 0 16px;
+  }
+
+  .metric {
+    flex: 1 1 150px;
+    max-width: 220px;
   }
 
   .metric-item {
