@@ -30,14 +30,21 @@ const BANKS = [
 ];
 
 let chartResizeTimer = null;
+let alertActionMap = {};
 
 let state = {
   membros: [{ id: 1, nome: "Eu", cor: "#c9a96e" }],
   gastos: [],
   parcelas: [],
   cartoes: [],
+  metasMensais: {},
+  alertasResolvidos: [],
   viewMonth: null,
   selectedColor: "#c9a96e",
+  filters: {
+    gastosQuery: "",
+    parcelasQuery: "",
+  },
 };
 
 function uid() {
@@ -109,6 +116,19 @@ function monthDiff(a, b) {
   return (by - ay) * 12 + (bm - am);
 }
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function quantile(sortedValues, q) {
+  if (!sortedValues.length) return 0;
+  const pos = (sortedValues.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  const next = sortedValues[base + 1];
+  return next !== undefined ? sortedValues[base] + rest * (next - sortedValues[base]) : sortedValues[base];
+}
+
 function fmt(v) {
   return (
     "R$ " +
@@ -125,6 +145,31 @@ function fmtCompact(v) {
     return "R$ " + (value / 1000).toFixed(1).replace(".", ",") + "k";
   }
   return "R$ " + value.toFixed(0).replace(".", ",");
+}
+
+function showToast(message, type) {
+  const container = document.getElementById("toast-container");
+  const toastType = ["success", "error", "info"].includes(type) ? type : "info";
+
+  if (!container) {
+    if (toastType === "error") alert(message);
+    return;
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${toastType}`;
+  toast.textContent = message;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(8px)";
+  }, 2500);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 2800);
 }
 
 function formatDateBR(isoDate) {
@@ -188,6 +233,8 @@ function save() {
       gastos: state.gastos,
       parcelas: state.parcelas,
       cartoes: state.cartoes,
+      metasMensais: state.metasMensais,
+      alertasResolvidos: state.alertasResolvidos,
     })
   );
 }
@@ -199,14 +246,22 @@ function load() {
     if (parsed.gastos) state.gastos = parsed.gastos;
     if (parsed.parcelas) state.parcelas = parsed.parcelas;
     if (parsed.cartoes) state.cartoes = parsed.cartoes;
+    if (parsed.metasMensais) state.metasMensais = parsed.metasMensais;
+    if (parsed.alertasResolvidos) state.alertasResolvidos = parsed.alertasResolvidos;
   } catch (_e) {
     state = {
       membros: [{ id: 1, nome: "Eu", cor: "#c9a96e" }],
       gastos: [],
       parcelas: [],
       cartoes: [],
+      metasMensais: {},
+      alertasResolvidos: [],
       viewMonth: null,
       selectedColor: "#c9a96e",
+      filters: {
+        gastosQuery: "",
+        parcelasQuery: "",
+      },
     };
   }
   migrateState();
@@ -329,6 +384,24 @@ function migrateState() {
 
   state.gastos = state.gastos.filter((g) => g.desc && g.valor > 0);
   state.parcelas = state.parcelas.filter((p) => p.desc && p.totalVal > 0 && p.total > 0);
+
+  if (!state.metasMensais || typeof state.metasMensais !== "object" || Array.isArray(state.metasMensais)) {
+    state.metasMensais = {};
+  }
+
+  const metas = {};
+  Object.entries(state.metasMensais).forEach(([ym, value]) => {
+    const validMonth = validYM(ym);
+    const parsed = Number(value);
+    if (validMonth && Number.isFinite(parsed) && parsed > 0) {
+      metas[validMonth] = Number(parsed.toFixed(2));
+    }
+  });
+  state.metasMensais = metas;
+
+  state.alertasResolvidos = Array.isArray(state.alertasResolvidos)
+    ? state.alertasResolvidos.filter((key) => typeof key === "string" && key.length <= 120)
+    : [];
 }
 
 function gastosDoMes(ym) {
@@ -370,6 +443,223 @@ function chargesByCard(ym) {
   });
 
   return totals;
+}
+
+function totalsByMonth(ym) {
+  const gastos = gastosDoMes(ym);
+  const parcelas = parcelasDoMes(ym);
+
+  const totalG = gastos.reduce((sum, gasto) => sum + gasto.valor, 0);
+  const totalP = parcelas.reduce((sum, parcela) => sum + parcela.valorParcela, 0);
+
+  return {
+    gastos,
+    parcelas,
+    totalG,
+    totalP,
+    total: totalG + totalP,
+  };
+}
+
+function projectionFactor(ym) {
+  if (ym !== curYM()) return 1;
+
+  const now = new Date();
+  const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const elapsed = Math.max(1, now.getDate());
+  return Math.max(elapsed / totalDays, 0.08);
+}
+
+function projectionByMonth(ym) {
+  const totals = totalsByMonth(ym);
+  const factor = projectionFactor(ym);
+  const projected = factor >= 1 ? totals.total : totals.total / factor;
+
+  return {
+    ...totals,
+    factor,
+    projected,
+  };
+}
+
+function metaDoMes(ym) {
+  return Number(state.metasMensais?.[ym] || 0);
+}
+
+function buildAlertProfile(ym) {
+  const months = Array.from({ length: 6 }, (_, index) => addMonths(ym, -index));
+
+  const usageSamples = months
+    .map((month) => {
+      const totalLimit = state.cartoes.reduce((sum, card) => sum + Number(card.limiteAtual || 0), 0);
+      if (totalLimit <= 0) return null;
+
+      const used = Object.values(chargesByCard(month)).reduce((sum, value) => sum + value, 0);
+      return (used / totalLimit) * 100;
+    })
+    .filter((value) => Number.isFinite(value))
+    .sort((a, b) => a - b);
+
+  const cardWarn = usageSamples.length ? clamp(Math.round(quantile(usageSamples, 0.5) + 8), 68, 85) : 75;
+  const cardCritical = usageSamples.length
+    ? clamp(Math.max(cardWarn + 8, Math.round(quantile(usageSamples, 0.8) + 10)), 82, 95)
+    : 90;
+
+  const expenseValues = state.gastos
+    .filter((gasto) => {
+      const diff = monthDiff(gasto.mes, ym);
+      return diff >= 0 && diff <= 5;
+    })
+    .map((gasto) => Number(gasto.valor))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((a, b) => a - b);
+
+  let expenseThreshold = 350;
+  let expenseHighThreshold = 650;
+
+  if (expenseValues.length >= 8) {
+    const q1 = quantile(expenseValues, 0.25);
+    const q3 = quantile(expenseValues, 0.75);
+    const iqr = Math.max(0, q3 - q1);
+
+    expenseThreshold = Math.max(180, q3 + iqr * 1.2);
+    expenseHighThreshold = Math.max(expenseThreshold * 1.45, q3 + iqr * 2);
+  } else if (expenseValues.length >= 3) {
+    const average = expenseValues.reduce((sum, value) => sum + value, 0) / expenseValues.length;
+    const maxValue = expenseValues[expenseValues.length - 1];
+
+    expenseThreshold = Math.max(250, average * 1.8, maxValue * 0.72);
+    expenseHighThreshold = Math.max(expenseThreshold * 1.5, maxValue * 0.9);
+  }
+
+  const monthTotals = months.map((month) => totalsByMonth(month).total).filter((total) => total > 0);
+  let goalBuffer = 0.05;
+
+  if (monthTotals.length >= 3) {
+    const avg = monthTotals.reduce((sum, value) => sum + value, 0) / monthTotals.length;
+    const variance = monthTotals.reduce((sum, value) => sum + (value - avg) ** 2, 0) / monthTotals.length;
+    const cv = avg > 0 ? Math.sqrt(variance) / avg : 0;
+    goalBuffer = clamp(0.04 + cv * 0.08, 0.04, 0.12);
+  }
+
+  const goalNearRatio = clamp(0.9 - goalBuffer * 0.4, 0.82, 0.9);
+
+  return {
+    cardWarn,
+    cardCritical,
+    expenseThreshold,
+    expenseHighThreshold,
+    goalBuffer,
+    goalNearRatio,
+  };
+}
+
+function buildAlerts(ym, profile) {
+  const alertProfile = profile || buildAlertProfile(ym);
+  const alerts = [];
+  const usageByCard = chargesByCard(ym);
+
+  state.cartoes.forEach((card) => {
+    const limit = Number(card.limiteAtual || 0);
+    if (limit <= 0) return;
+
+    const used = usageByCard[card.id] || 0;
+    const pct = (used / limit) * 100;
+    if (pct < alertProfile.cardWarn) return;
+
+    let level = "medium";
+    let thresholdKey = String(alertProfile.cardWarn);
+    let title = `Uso elevado no cartão ${cardName(card)}`;
+
+    if (pct >= 100) {
+      level = "high";
+      thresholdKey = "100";
+      title = `Limite estourado em ${cardName(card)}`;
+    } else if (pct >= alertProfile.cardCritical) {
+      level = "high";
+      thresholdKey = String(alertProfile.cardCritical);
+      title = `Uso crítico no cartão ${cardName(card)}`;
+    }
+
+    alerts.push({
+      key: `card-${ym}-${card.id}-${thresholdKey}`,
+      level,
+      title,
+      text: `${Math.round(pct)}% do limite usado (${fmt(used)} de ${fmt(limit)}).`,
+      tip: `Sugestão: priorize gastos no débito/PIX até aliviar a fatura (alerta a partir de ${alertProfile.cardWarn}%).`,
+      target: {
+        page: "cartoes",
+        label: "Abrir Cartões",
+        toast: "Revise limites e uso dos cartões nesta tela.",
+      },
+    });
+  });
+
+  const gastosMes = gastosDoMes(ym).map((gasto, index) => ({ gasto, index }));
+  if (gastosMes.length) {
+    const threshold = alertProfile.expenseThreshold;
+    const highThreshold = alertProfile.expenseHighThreshold;
+
+    gastosMes
+      .filter((item) => item.gasto.valor >= threshold)
+      .sort((a, b) => b.gasto.valor - a.gasto.valor)
+      .slice(0, 3)
+      .forEach((item) => {
+        const member = getMembro(item.gasto.membroId);
+        const highSeverity = item.gasto.valor >= highThreshold;
+        alerts.push({
+          key: `expense-${ym}-${item.index}-${Math.round(item.gasto.valor)}`,
+          level: highSeverity ? "high" : "medium",
+          title: `Gasto fora do padrão: ${item.gasto.desc}`,
+          text: `${fmt(item.gasto.valor)} em ${item.gasto.cat} por ${member.nome}.`,
+          tip: "Sugestão: valide se foi compra pontual ou se precisa de ajuste na categoria.",
+          target: {
+            page: "gastos",
+            label: "Ver no Histórico",
+            searchGastos: item.gasto.desc,
+            toast: "Filtro aplicado no histórico para facilitar a análise.",
+          },
+        });
+      });
+  }
+
+  const meta = metaDoMes(ym);
+  if (meta > 0) {
+    const data = projectionByMonth(ym);
+    const projected = Number(data.projected.toFixed(2));
+
+    if (projected > meta * (1 + alertProfile.goalBuffer)) {
+      alerts.push({
+        key: `goal-over-${ym}`,
+        level: "high",
+        title: "Projeção acima da meta",
+        text: `Projeção de ${fmt(projected)} para meta de ${fmt(meta)}.`,
+        tip: `Sugestão: reduzir cerca de ${fmt(projected - meta)} em gastos variáveis este mês.`,
+        target: {
+          page: "resumo",
+          label: "Ajustar Meta",
+          focusId: "meta-total",
+          toast: "Você pode ajustar a meta mensal logo acima.",
+        },
+      });
+    } else if (data.total >= meta * alertProfile.goalNearRatio && data.factor < 1) {
+      alerts.push({
+        key: `goal-near-${ym}`,
+        level: "medium",
+        title: "Meta próxima do limite",
+        text: `Você já atingiu ${Math.round((data.total / meta) * 100)}% da meta mensal.`,
+        tip: "Sugestão: acompanhe diariamente as categorias com maior impacto.",
+        target: {
+          page: "resumo",
+          label: "Revisar Meta",
+          focusId: "meta-total",
+        },
+      });
+    }
+  }
+
+  const priority = { high: 0, medium: 1, low: 2 };
+  return alerts.sort((a, b) => (priority[a.level] ?? 3) - (priority[b.level] ?? 3));
 }
 
 function populateBankSelect() {
@@ -421,6 +711,7 @@ function renderCardSelects() {
 function showPage(name, btn) {
   document.querySelectorAll(".page").forEach((page) => page.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach((button) => button.classList.remove("active"));
+  document.querySelectorAll(".bottom-nav-item").forEach((item) => item.classList.remove("active"));
 
   const page = document.getElementById("page-" + name);
   if (page) page.classList.add("active");
@@ -432,6 +723,12 @@ function showPage(name, btn) {
     if (autoBtn) autoBtn.classList.add("active");
   }
 
+  const mobileBtn = document.querySelector(`.bottom-nav-item[data-page="${name}"]`);
+  if (mobileBtn) mobileBtn.classList.add("active");
+
+  const mainContent = document.getElementById("main-content");
+  if (mainContent) mainContent.focus({ preventScroll: true });
+
   renderAll();
 }
 
@@ -440,6 +737,20 @@ function changeMonth(delta) {
   document.getElementById("month-label").textContent = monthLabel(state.viewMonth);
   document.getElementById("resumo-sub").textContent = "Visão geral de " + monthLabel(state.viewMonth);
   renderAll();
+}
+
+function goToCurrentMonth() {
+  const now = curYM();
+  if (state.viewMonth === now) {
+    showToast("Você já está no mês atual.", "info");
+    return;
+  }
+
+  state.viewMonth = now;
+  document.getElementById("month-label").textContent = monthLabel(state.viewMonth);
+  document.getElementById("resumo-sub").textContent = "Visão geral de " + monthLabel(state.viewMonth);
+  renderAll();
+  showToast("Mês atual selecionado.", "success");
 }
 
 function renderMetrics() {
@@ -549,19 +860,38 @@ function renderParcelasResumo() {
     .join("");
 }
 
+function matchQuery(parts, query) {
+  const q = normText(query);
+  if (!q) return true;
+  return parts.some((part) => normText(part).includes(q));
+}
+
 function renderGastos() {
   const root = document.getElementById("gastos-list");
+  const query = state.filters?.gastosQuery || "";
 
   if (!state.gastos.length) {
     root.innerHTML = '<div class="empty">Nenhum gasto ainda. Adicione o primeiro!</div>';
     return;
   }
 
-  const sorted = [...state.gastos].reverse();
-  root.innerHTML = sorted
-    .map((gasto, index) => {
+  const filtered = state.gastos
+    .map((gasto, index) => ({ gasto, index }))
+    .filter(({ gasto }) => {
       const member = getMembro(gasto.membroId);
-      const realIndex = state.gastos.length - 1 - index;
+      const card = gasto.forma === "Crédito" ? cardName(getCartao(gasto.cartaoId)) : "";
+      return matchQuery([gasto.desc, gasto.cat, gasto.forma, member.nome, card, monthLabel(gasto.mes)], query);
+    })
+    .reverse();
+
+  if (!filtered.length) {
+    root.innerHTML = '<div class="empty">Nenhum gasto encontrado para essa busca.</div>';
+    return;
+  }
+
+  root.innerHTML = filtered
+    .map(({ gasto, index }) => {
+      const member = getMembro(gasto.membroId);
       const paymentInfo =
         gasto.forma === "Crédito"
           ? `${gasto.forma} • ${cardLabelById(gasto.cartaoId)}`
@@ -574,7 +904,7 @@ function renderGastos() {
           <div class="item-meta">${monthLabel(gasto.mes)} • ${member.nome} • ${paymentInfo}</div>
         </div>
         <div class="item-val">${fmt(gasto.valor)}</div>
-        <button class="btn btn-danger btn-sm" onclick="delGasto(${realIndex})">✕</button>
+        <button class="btn btn-danger btn-sm" onclick="delGasto(${index})">✕</button>
       </div>`;
     })
     .join("");
@@ -582,14 +912,28 @@ function renderGastos() {
 
 function renderParcelas() {
   const root = document.getElementById("parcelas-list");
+  const query = state.filters?.parcelasQuery || "";
 
   if (!state.parcelas.length) {
     root.innerHTML = '<div class="empty">Nenhuma parcela cadastrada</div>';
     return;
   }
 
-  root.innerHTML = state.parcelas
-    .map((parcela, index) => {
+  const filtered = state.parcelas
+    .map((parcela, index) => ({ parcela, index }))
+    .filter(({ parcela }) => {
+      const member = getMembro(parcela.membroId);
+      const card = parcela.cartaoId ? cardName(getCartao(parcela.cartaoId)) : parcela.cartao || "Cartão";
+      return matchQuery([parcela.desc, member.nome, card], query);
+    });
+
+  if (!filtered.length) {
+    root.innerHTML = '<div class="empty">Nenhuma parcela encontrada para essa busca.</div>';
+    return;
+  }
+
+  root.innerHTML = filtered
+    .map(({ parcela, index }) => {
       const member = getMembro(parcela.membroId);
       const endMonth = addMonths(parcela.inicio, parcela.total - parcela.atual);
       const progress = Math.round((parcela.atual / parcela.total) * 100);
@@ -909,6 +1253,221 @@ function renderCharts() {
   drawBarChart(evolutionCanvas, labels, values);
 }
 
+function renderProjectionMeta() {
+  const summary = document.getElementById("projection-summary");
+  const goalStatus = document.getElementById("goal-status");
+  const goalInput = document.getElementById("meta-total");
+
+  if (!summary || !goalStatus || !goalInput) return;
+
+  const ym = state.viewMonth;
+  const data = projectionByMonth(ym);
+  const projected = Number(data.projected.toFixed(2));
+  const factorPct = Math.min(100, Math.round(data.factor * 100));
+  const meta = metaDoMes(ym);
+
+  if (document.activeElement !== goalInput) {
+    goalInput.value = meta > 0 ? meta.toFixed(2) : "";
+  }
+
+  summary.innerHTML = `
+    <div class="projection-cell">
+      <span>Total acumulado</span>
+      <strong>${fmt(data.total)}</strong>
+    </div>
+    <div class="projection-cell">
+      <span>Projeção fechamento</span>
+      <strong>${fmt(projected)}</strong>
+    </div>
+    <div class="projection-cell">
+      <span>Gastos avulsos</span>
+      <strong>${fmt(data.totalG)}</strong>
+    </div>
+    <div class="projection-cell">
+      <span>Parcelas no mês</span>
+      <strong>${fmt(data.totalP)}</strong>
+    </div>
+  `;
+
+  if (meta <= 0) {
+    goalStatus.innerHTML = '<div class="empty" style="padding:16px">Defina uma meta mensal para acompanhar risco de estouro.</div>';
+    return;
+  }
+
+  const projectedPct = Math.round((projected / meta) * 100);
+  const fill = Math.min(100, Math.max(0, projectedPct));
+  const fillColor = projectedPct > 100 ? "var(--red)" : projectedPct >= 85 ? "var(--accent)" : "var(--green)";
+
+  let statusText = `Ritmo atual: ${factorPct}% do mês transcorrido.`;
+  if (projectedPct > 100) {
+    statusText = `Atenção: projeção ${projectedPct}% da meta. Ajuste recomendado.`;
+  } else if (projectedPct >= 85) {
+    statusText = `Atenção moderada: projeção próxima do limite da meta.`;
+  }
+
+  goalStatus.innerHTML = `
+    <div class="goal-track">
+      <div class="goal-fill" style="width:${fill}%;background:${fillColor}"></div>
+    </div>
+    <div class="goal-meta">
+      <span>Meta: ${fmt(meta)}</span>
+      <span>${projectedPct}% projetado</span>
+    </div>
+    <div class="item-meta" style="margin-top:6px">${statusText}</div>
+  `;
+}
+
+function renderAlertsCenter() {
+  const activeRoot = document.getElementById("alerts-active");
+  const resolvedRoot = document.getElementById("alerts-resolved");
+  const activeCount = document.getElementById("alerts-active-count");
+  const resolvedCount = document.getElementById("alerts-resolved-count");
+  const profileRoot = document.getElementById("alerts-profile");
+
+  if (!activeRoot || !resolvedRoot || !activeCount || !resolvedCount) return;
+
+  const profile = buildAlertProfile(state.viewMonth);
+  const alerts = buildAlerts(state.viewMonth, profile);
+  const resolvedSet = new Set(state.alertasResolvidos || []);
+
+  if (profileRoot) {
+    profileRoot.textContent = `Perfil atual: cartão alerta em ${profile.cardWarn}% (crítico em ${profile.cardCritical}%) • gasto fora do padrão acima de ${fmt(
+      profile.expenseThreshold
+    )}.`;
+  }
+
+  alertActionMap = {};
+  alerts.forEach((alert) => {
+    if (alert.target) {
+      alertActionMap[alert.key] = alert.target;
+    }
+  });
+
+  const activeAlerts = alerts.filter((alert) => !resolvedSet.has(alert.key));
+  const resolvedAlerts = alerts.filter((alert) => resolvedSet.has(alert.key));
+
+  activeCount.textContent = `${activeAlerts.length} ativos`;
+  resolvedCount.textContent = `${resolvedAlerts.length} resolvidos`;
+
+  activeRoot.innerHTML = activeAlerts.length
+    ? activeAlerts
+        .map(
+          (alert) => {
+            const quickAction = alert.target
+              ? `<button class="btn btn-sm" onclick="goToAlertTarget('${alert.key}')">${alert.target.label || "Abrir seção"}</button>`
+              : "";
+
+            return `
+            <div class="alert-item level-${alert.level}">
+              <div class="alert-title">${alert.title}</div>
+              <div class="alert-text">${alert.text}</div>
+              <div class="alert-tip">${alert.tip}</div>
+              <div class="alert-actions">
+                ${quickAction}
+                <button class="btn btn-sm" onclick="resolveAlert('${alert.key}')">Resolver</button>
+              </div>
+            </div>
+          `;
+          }
+        )
+        .join("")
+    : '<div class="empty" style="padding:16px">Nenhum alerta ativo neste mês.</div>';
+
+  resolvedRoot.innerHTML = resolvedAlerts.length
+    ? resolvedAlerts
+        .map(
+          (alert) => {
+            const quickAction = alert.target
+              ? `<button class="btn btn-sm" onclick="goToAlertTarget('${alert.key}')">${alert.target.label || "Abrir seção"}</button>`
+              : "";
+
+            return `
+            <div class="alert-item level-${alert.level} resolved">
+              <div class="alert-title">${alert.title}</div>
+              <div class="alert-text">${alert.text}</div>
+              <div class="alert-actions">
+                ${quickAction}
+                <button class="btn btn-sm" onclick="reabrirAlerta('${alert.key}')">Reativar</button>
+              </div>
+            </div>
+          `;
+          }
+        )
+        .join("")
+    : '<div class="empty" style="padding:16px">Nenhum alerta resolvido neste mês.</div>';
+}
+
+function goToAlertTarget(key) {
+  const target = alertActionMap[key];
+  if (!target) return;
+
+  const activePage = (document.querySelector(".page.active")?.id || "").replace("page-", "");
+  if (target.page && activePage !== target.page) {
+    showPage(target.page, null);
+  }
+
+  if (target.searchGastos !== undefined) {
+    state.filters.gastosQuery = target.searchGastos;
+    const gastosSearch = document.getElementById("gastos-search");
+    if (gastosSearch) gastosSearch.value = target.searchGastos;
+    renderGastos();
+  }
+
+  if (target.focusId) {
+    const focusEl = document.getElementById(target.focusId);
+    if (focusEl) {
+      focusEl.focus();
+      if (typeof focusEl.select === "function") focusEl.select();
+    }
+  }
+
+  if (target.toast) {
+    showToast(target.toast, "info");
+  }
+}
+
+function saveMetaMensal() {
+  const input = document.getElementById("meta-total");
+  if (!input) return;
+
+  const parsed = parseMoney(input.value);
+
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    showToast("Informe uma meta válida maior ou igual a zero.", "error");
+    input.focus();
+    return;
+  }
+
+  if (parsed === 0) {
+    delete state.metasMensais[state.viewMonth];
+    save();
+    renderAll();
+    showToast("Meta removida para este mês.", "info");
+    return;
+  }
+
+  state.metasMensais[state.viewMonth] = Number(parsed.toFixed(2));
+  save();
+  renderAll();
+  showToast("Meta mensal atualizada.", "success");
+}
+
+function resolveAlert(key) {
+  if (!state.alertasResolvidos.includes(key)) {
+    state.alertasResolvidos.push(key);
+    save();
+  }
+  renderAlertsCenter();
+  showToast("Alerta marcado como resolvido.", "info");
+}
+
+function reabrirAlerta(key) {
+  state.alertasResolvidos = state.alertasResolvidos.filter((item) => item !== key);
+  save();
+  renderAlertsCenter();
+  showToast("Alerta reativado.", "info");
+}
+
 function renderAll() {
   renderMemberSelects();
   renderCardSelects();
@@ -921,6 +1480,8 @@ function renderAll() {
   renderMembros();
   renderColorOptions();
   renderCharts();
+  renderProjectionMeta();
+  renderAlertsCenter();
 }
 
 function toggleGastoCartaoField() {
@@ -934,22 +1495,32 @@ function toggleGastoCartaoField() {
 }
 
 function addGasto() {
-  const desc = document.getElementById("g-desc").value.trim();
-  const val = parseMoney(document.getElementById("g-val").value);
+  const descField = document.getElementById("g-desc");
+  const valueField = document.getElementById("g-val");
+  const cardField = document.getElementById("g-cartao");
+
+  const desc = descField.value.trim();
+  const val = parseMoney(valueField.value);
   const membroId = Number(document.getElementById("g-membro").value);
   const cat = document.getElementById("g-cat").value;
   const mes = document.getElementById("g-mes").value || state.viewMonth;
   const forma = document.getElementById("g-forma").value;
-  const cardSelected = document.getElementById("g-cartao").value;
+  const cardSelected = cardField.value;
   const cartaoId = cardSelected ? Number(cardSelected) : null;
 
   if (!desc || !Number.isFinite(val) || val <= 0) {
-    alert("Preencha a descrição e um valor válido.");
+    showToast("Preencha a descrição e um valor válido.", "error");
+    if (!desc) {
+      descField.focus();
+    } else {
+      valueField.focus();
+    }
     return;
   }
 
   if (forma === "Crédito" && !cartaoId) {
-    alert("Selecione um cartão para gastos no crédito.");
+    showToast("Selecione um cartão para gastos no crédito.", "error");
+    cardField.focus();
     return;
   }
 
@@ -963,35 +1534,52 @@ function addGasto() {
     cartaoId: forma === "Crédito" ? cartaoId : null,
   });
 
-  document.getElementById("g-desc").value = "";
-  document.getElementById("g-val").value = "";
+  descField.value = "";
+  valueField.value = "";
+  descField.focus();
 
   save();
   renderAll();
+  showToast("Gasto adicionado com sucesso.", "success");
 }
 
 function addParcela() {
-  const desc = document.getElementById("p-desc").value.trim();
-  const totalVal = parseMoney(document.getElementById("p-total").value);
-  const total = parseInt(document.getElementById("p-num").value, 10);
-  const atual = parseInt(document.getElementById("p-atual").value, 10) || 1;
+  const descField = document.getElementById("p-desc");
+  const totalField = document.getElementById("p-total");
+  const numField = document.getElementById("p-num");
+  const atualField = document.getElementById("p-atual");
+  const cardField = document.getElementById("p-cartao");
+
+  const desc = descField.value.trim();
+  const totalVal = parseMoney(totalField.value);
+  const total = parseInt(numField.value, 10);
+  const atual = parseInt(atualField.value, 10) || 1;
   const membroId = Number(document.getElementById("p-membro").value);
-  const cardSelected = document.getElementById("p-cartao").value;
+  const cardSelected = cardField.value;
   const cartaoId = cardSelected ? Number(cardSelected) : null;
   const inicio = document.getElementById("p-inicio").value || state.viewMonth;
 
   if (!desc || !Number.isFinite(totalVal) || !Number.isFinite(total) || total <= 0) {
-    alert("Preencha todos os campos obrigatórios da parcela.");
+    showToast("Preencha todos os campos obrigatórios da parcela.", "error");
+    if (!desc) {
+      descField.focus();
+    } else if (!Number.isFinite(totalVal)) {
+      totalField.focus();
+    } else {
+      numField.focus();
+    }
     return;
   }
 
   if (!cartaoId) {
-    alert("Selecione um cartão cadastrado para a parcela.");
+    showToast("Selecione um cartão cadastrado para a parcela.", "error");
+    cardField.focus();
     return;
   }
 
   if (atual < 1 || atual > total) {
-    alert("A parcela atual deve estar entre 1 e o total de parcelas.");
+    showToast("A parcela atual deve estar entre 1 e o total de parcelas.", "error");
+    atualField.focus();
     return;
   }
 
@@ -1007,33 +1595,42 @@ function addParcela() {
     pago: false,
   });
 
-  document.getElementById("p-desc").value = "";
-  document.getElementById("p-total").value = "";
-  document.getElementById("p-num").value = "";
+  descField.value = "";
+  totalField.value = "";
+  numField.value = "";
+  descField.focus();
 
   save();
   renderAll();
+  showToast("Parcela adicionada com sucesso.", "success");
 }
 
 function addCartao() {
   const bancoId = document.getElementById("c-banco").value;
-  const apelido = document.getElementById("c-apelido").value.trim();
-  const fechamentoDia = safeDay(document.getElementById("c-fechamento").value, 7);
-  const vencimentoDia = safeDay(document.getElementById("c-vencimento").value, 15);
-  const limiteAtual = parseMoney(document.getElementById("c-limite").value);
+  const aliasField = document.getElementById("c-apelido");
+  const limitField = document.getElementById("c-limite");
+  const fechamentoField = document.getElementById("c-fechamento");
+  const vencimentoField = document.getElementById("c-vencimento");
+
+  const apelido = aliasField.value.trim();
+  const fechamentoDia = safeDay(fechamentoField.value, 7);
+  const vencimentoDia = safeDay(vencimentoField.value, 15);
+  const limiteAtual = parseMoney(limitField.value);
 
   if (!bancoId) {
-    alert("Selecione um banco.");
+    showToast("Selecione um banco.", "error");
     return;
   }
 
   if (!Number.isFinite(limiteAtual) || limiteAtual < 0) {
-    alert("Informe um limite válido para o cartão.");
+    showToast("Informe um limite válido para o cartão.", "error");
+    limitField.focus();
     return;
   }
 
   if (fechamentoDia === vencimentoDia) {
-    alert("Dia de fechamento e dia de vencimento devem ser diferentes.");
+    showToast("Dia de fechamento e dia de vencimento devem ser diferentes.", "error");
+    fechamentoField.focus();
     return;
   }
 
@@ -1044,7 +1641,7 @@ function addCartao() {
   });
 
   if (duplicate) {
-    alert("Já existe um cartão com esse banco/nome.");
+    showToast("Já existe um cartão com esse banco/nome.", "error");
     return;
   }
 
@@ -1058,14 +1655,15 @@ function addCartao() {
     limiteHistorico: [{ data: todayISO(), valor: limiteAtual }],
   });
 
-  document.getElementById("c-apelido").value = "";
-  document.getElementById("c-limite").value = "";
-  document.getElementById("c-fechamento").value = "7";
-  document.getElementById("c-vencimento").value = "15";
+  aliasField.value = "";
+  limitField.value = "";
+  fechamentoField.value = "7";
+  vencimentoField.value = "15";
 
   save();
   renderAll();
   showPage("cartoes");
+  showToast("Cartão cadastrado com sucesso.", "success");
 }
 
 function updateCartaoLimite(index) {
@@ -1078,7 +1676,7 @@ function updateCartaoLimite(index) {
 
   const newLimit = parseMoney(input);
   if (!Number.isFinite(newLimit) || newLimit < 0) {
-    alert("Informe um limite válido.");
+    showToast("Informe um limite válido.", "error");
     return;
   }
 
@@ -1088,6 +1686,7 @@ function updateCartaoLimite(index) {
 
   save();
   renderAll();
+  showToast("Limite atualizado.", "success");
 }
 
 function editCartaoDatas(index) {
@@ -1104,7 +1703,7 @@ function editCartaoDatas(index) {
   const vencimentoDia = safeDay(vencimentoRaw, card.vencimentoDia);
 
   if (fechamentoDia === vencimentoDia) {
-    alert("Dia de fechamento e dia de vencimento devem ser diferentes.");
+    showToast("Dia de fechamento e dia de vencimento devem ser diferentes.", "error");
     return;
   }
 
@@ -1113,6 +1712,7 @@ function editCartaoDatas(index) {
 
   save();
   renderAll();
+  showToast("Datas do cartão atualizadas.", "success");
 }
 
 function delCartao(index) {
@@ -1140,22 +1740,27 @@ function delCartao(index) {
 
   save();
   renderAll();
+  showToast("Cartão removido.", "info");
 }
 
 function addMembro() {
-  const nome = document.getElementById("m-nome").value.trim();
+  const nomeField = document.getElementById("m-nome");
+  const nome = nomeField.value.trim();
   const cor = document.getElementById("m-cor").value || "#c9a96e";
 
   if (!nome) {
-    alert("Informe o nome do membro.");
+    showToast("Informe o nome do membro.", "error");
+    nomeField.focus();
     return;
   }
 
   state.membros.push({ id: uid(), nome, cor });
-  document.getElementById("m-nome").value = "";
+  nomeField.value = "";
+  nomeField.focus();
 
   save();
   renderAll();
+  showToast("Membro adicionado.", "success");
 }
 
 function delGasto(index) {
@@ -1163,6 +1768,7 @@ function delGasto(index) {
   state.gastos.splice(index, 1);
   save();
   renderAll();
+  showToast("Gasto removido.", "info");
 }
 
 function delParcela(index) {
@@ -1170,12 +1776,17 @@ function delParcela(index) {
   state.parcelas.splice(index, 1);
   save();
   renderAll();
+  showToast("Parcela removida.", "info");
 }
 
 function togglePago(index) {
-  state.parcelas[index].pago = !state.parcelas[index].pago;
+  const parcela = state.parcelas[index];
+  if (!parcela) return;
+
+  parcela.pago = !parcela.pago;
   save();
   renderAll();
+  showToast(parcela.pago ? "Parcela marcada como quitada." : "Parcela reativada.", "info");
 }
 
 function delMembro(index) {
@@ -1189,6 +1800,7 @@ function delMembro(index) {
 
   save();
   renderAll();
+  showToast("Membro e registros removidos.", "info");
 }
 
 function init() {
@@ -1206,6 +1818,32 @@ function init() {
     document.getElementById("c-vencimento").value = "15";
 
     document.getElementById("g-forma").addEventListener("change", toggleGastoCartaoField);
+
+    const gastosSearch = document.getElementById("gastos-search");
+    if (gastosSearch) {
+      gastosSearch.addEventListener("input", (event) => {
+        state.filters.gastosQuery = event.target.value;
+        renderGastos();
+      });
+    }
+
+    const parcelasSearch = document.getElementById("parcelas-search");
+    if (parcelasSearch) {
+      parcelasSearch.addEventListener("input", (event) => {
+        state.filters.parcelasQuery = event.target.value;
+        renderParcelas();
+      });
+    }
+
+    const metaTotalInput = document.getElementById("meta-total");
+    if (metaTotalInput) {
+      metaTotalInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          saveMetaMensal();
+        }
+      });
+    }
 
     window.addEventListener("resize", () => {
       clearTimeout(chartResizeTimer);

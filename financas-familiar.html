@@ -12,6 +12,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+
 <div id="loading-screen" class="loading-screen active">
   <div class="loading-logo">
     <div class="logo-title">Ninos</div>
@@ -43,6 +45,7 @@
         <span class="month-current" id="month-label"></span>
         <button onclick="changeMonth(1)">&#8594;</button>
       </div>
+      <button class="month-reset-btn" onclick="goToCurrentMonth()">Mês atual</button>
     </div>
 
     <nav class="nav">
@@ -89,7 +92,7 @@
     </nav>
   </aside>
 
-  <main class="main">
+  <main class="main" id="main-content" tabindex="-1">
 
     <div id="page-resumo" class="page active">
       <div class="page-header">
@@ -124,6 +127,38 @@
           <div class="chart-note">Últimos 6 meses (gastos + parcelas)</div>
         </div>
       </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Projeção e meta do mês</div>
+
+          <div class="goal-input-row">
+            <div class="form-col goal-field">
+              <label for="meta-total">Meta mensal total (R$)</label>
+              <input id="meta-total" type="number" min="0" step="0.01" placeholder="0,00">
+            </div>
+            <button class="btn btn-primary" onclick="saveMetaMensal()">Salvar meta</button>
+          </div>
+
+          <div id="projection-summary" class="projection-grid"></div>
+          <div id="goal-status" class="goal-status"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Central de alertas</div>
+
+          <div class="alerts-header">
+            <span class="badge badge-red" id="alerts-active-count">0 ativos</span>
+            <span class="badge badge-blue" id="alerts-resolved-count">0 resolvidos</span>
+          </div>
+
+          <div id="alerts-profile" class="alerts-profile"></div>
+
+          <div id="alerts-active"></div>
+          <div class="alerts-divider">Resolvidos</div>
+          <div id="alerts-resolved"></div>
+        </div>
+      </div>
     </div>
 
     <div id="page-gastos" class="page">
@@ -137,22 +172,22 @@
 
         <div class="form-grid">
           <div class="form-col span2">
-            <label>Descrição</label>
+            <label for="g-desc">Descrição</label>
             <input id="g-desc" placeholder="ex: Mercado, Farmácia...">
           </div>
         </div>
 
         <div class="form-grid three">
           <div class="form-col">
-            <label>Valor (R$)</label>
+            <label for="g-val">Valor (R$)</label>
             <input id="g-val" type="number" placeholder="0,00" min="0" step="0.01">
           </div>
           <div class="form-col">
-            <label>Membro</label>
+            <label for="g-membro">Membro</label>
             <select id="g-membro"></select>
           </div>
           <div class="form-col">
-            <label>Categoria</label>
+            <label for="g-cat">Categoria</label>
             <select id="g-cat">
               <option>Alimentação</option>
               <option>Transporte</option>
@@ -168,11 +203,11 @@
 
         <div class="form-grid three">
           <div class="form-col">
-            <label>Mês de referência</label>
+            <label for="g-mes">Mês de referência</label>
             <input id="g-mes" type="month">
           </div>
           <div class="form-col">
-            <label>Forma de pagamento</label>
+            <label for="g-forma">Forma de pagamento</label>
             <select id="g-forma">
               <option>Dinheiro</option>
               <option>Débito</option>
@@ -181,7 +216,7 @@
             </select>
           </div>
           <div class="form-col">
-            <label>Cartão (se crédito)</label>
+            <label for="g-cartao">Cartão (se crédito)</label>
             <select id="g-cartao" disabled></select>
           </div>
         </div>
@@ -191,6 +226,9 @@
 
       <div class="card">
         <div class="card-title">Histórico</div>
+        <div class="list-tools">
+          <input id="gastos-search" type="search" placeholder="Buscar por descrição, membro, categoria ou forma de pagamento" aria-label="Buscar no histórico de gastos">
+        </div>
         <div id="gastos-list"></div>
       </div>
     </div>
@@ -206,37 +244,37 @@
 
         <div class="form-grid">
           <div class="form-col span2">
-            <label>Descrição</label>
+            <label for="p-desc">Descrição</label>
             <input id="p-desc" placeholder="ex: TV Samsung, Notebook...">
           </div>
         </div>
 
         <div class="form-grid three">
           <div class="form-col">
-            <label>Valor total (R$)</label>
+            <label for="p-total">Valor total (R$)</label>
             <input id="p-total" type="number" placeholder="0,00" min="0" step="0.01">
           </div>
           <div class="form-col">
-            <label>Nº de parcelas</label>
+            <label for="p-num">Nº de parcelas</label>
             <input id="p-num" type="number" min="1" placeholder="12">
           </div>
           <div class="form-col">
-            <label>Parcela atual</label>
+            <label for="p-atual">Parcela atual</label>
             <input id="p-atual" type="number" min="1" placeholder="1">
           </div>
         </div>
 
         <div class="form-grid three">
           <div class="form-col">
-            <label>Membro</label>
+            <label for="p-membro">Membro</label>
             <select id="p-membro"></select>
           </div>
           <div class="form-col">
-            <label>Cartão cadastrado</label>
+            <label for="p-cartao">Cartão cadastrado</label>
             <select id="p-cartao"></select>
           </div>
           <div class="form-col">
-            <label>Mês início</label>
+            <label for="p-inicio">Mês início</label>
             <input id="p-inicio" type="month">
           </div>
         </div>
@@ -248,6 +286,9 @@
 
       <div class="card">
         <div class="card-title">Parcelas cadastradas</div>
+        <div class="list-tools">
+          <input id="parcelas-search" type="search" placeholder="Buscar por descrição, membro ou cartão" aria-label="Buscar nas parcelas cadastradas">
+        </div>
         <div id="parcelas-list"></div>
       </div>
     </div>
@@ -263,26 +304,26 @@
 
         <div class="form-grid three">
           <div class="form-col">
-            <label>Banco</label>
+            <label for="c-banco">Banco</label>
             <select id="c-banco"></select>
           </div>
           <div class="form-col">
-            <label>Apelido (opcional)</label>
+            <label for="c-apelido">Apelido (opcional)</label>
             <input id="c-apelido" placeholder="ex: Nubank Principal">
           </div>
           <div class="form-col">
-            <label>Limite atual (R$)</label>
+            <label for="c-limite">Limite atual (R$)</label>
             <input id="c-limite" type="number" min="0" step="0.01" placeholder="0,00">
           </div>
         </div>
 
         <div class="form-grid">
           <div class="form-col">
-            <label>Dia de fechamento</label>
+            <label for="c-fechamento">Dia de fechamento</label>
             <input id="c-fechamento" type="number" min="1" max="31" value="7">
           </div>
           <div class="form-col">
-            <label>Dia de vencimento</label>
+            <label for="c-vencimento">Dia de vencimento</label>
             <input id="c-vencimento" type="number" min="1" max="31" value="15">
           </div>
         </div>
@@ -306,7 +347,7 @@
         <div class="card-title">Adicionar membro</div>
         <div class="form-grid">
           <div class="form-col">
-            <label>Nome</label>
+            <label for="m-nome">Nome</label>
             <input id="m-nome" placeholder="ex: Maria, João...">
           </div>
           <div class="form-col">
@@ -333,32 +374,39 @@
         <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
         <rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/>
       </svg>
+      <span class="bottom-nav-text">Resumo</span>
     </button>
     <button class="bottom-nav-item" data-page="gastos" onclick="navigatePage('gastos', this)" aria-label="Gastos">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v7M5.5 6.5h4a1 1 0 0 1 0 2h-3a1 1 0 0 0 0 2h4"/>
       </svg>
+      <span class="bottom-nav-text">Gastos</span>
     </button>
     <button class="bottom-nav-item" data-page="parcelas" onclick="navigatePage('parcelas', this)" aria-label="Parcelas">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="1.5" y="3" width="13" height="10" rx="1.5"/>
         <path d="M1.5 6.5h13M5 10h2M9 10h2"/>
       </svg>
+      <span class="bottom-nav-text">Parcelas</span>
     </button>
     <button class="bottom-nav-item" data-page="cartoes" onclick="navigatePage('cartoes', this)" aria-label="Cartões">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/>
         <path d="M1.5 6h13M4.5 10.5h3.5"/>
       </svg>
+      <span class="bottom-nav-text">Cartões</span>
     </button>
     <button class="bottom-nav-item" data-page="membros" onclick="navigatePage('membros', this)" aria-label="Membros">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
         <circle cx="12" cy="5" r="2"/><path d="M12 9c1.66 0 3 1.34 3 3"/>
       </svg>
+      <span class="bottom-nav-text">Membros</span>
     </button>
   </nav>
 </div>
+
+<div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
 <script src="assets/js/app.js"></script>
 </body>
