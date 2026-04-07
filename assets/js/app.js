@@ -1215,6 +1215,45 @@ function init() {
 
   state.selectedColor = COLORS[0];
   renderAll();
+
+  // Esconder loading screen após 1.2s
+  setTimeout(() => {
+    const loadingScreen = document.getElementById("loading-screen");
+    if (loadingScreen) {
+      loadingScreen.classList.add("hidden");
+    }
+  }, 1200);
+}
+
+/* ===== Menu Hambúrguer ===== */
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sidebar-overlay");
+  
+  if (!sidebar) return;
+  
+  const isOpen = sidebar.classList.contains("open");
+  
+  if (isOpen) {
+    sidebar.classList.remove("open");
+    overlay.classList.remove("active");
+  } else {
+    sidebar.classList.add("open");
+    overlay.classList.add("active");
+  }
+}
+
+/* ===== Fecha menu ao mudar de página ===== */
+function showPageWithMenuClose(pageName, btn) {
+  showPage(pageName, btn);
+  
+  // Fechar sidebar em mobile após selecionar página
+  if (window.innerWidth <= 600) {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebar-overlay");
+    sidebar.classList.remove("open");
+    overlay.classList.remove("active");
+  }
 }
 
 init();
