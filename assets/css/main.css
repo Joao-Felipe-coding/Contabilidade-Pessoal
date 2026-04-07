@@ -356,6 +356,72 @@ select {
   grid-column: span 2;
 }
 
+.form-collapsible {
+  padding: 0;
+  overflow: hidden;
+}
+
+.card-collapse-toggle {
+  list-style: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 18px 24px;
+  cursor: pointer;
+}
+
+.card-collapse-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.card-collapse-toggle::marker {
+  content: "";
+}
+
+.form-collapsible .card-title {
+  margin-bottom: 0;
+}
+
+.collapse-indicator {
+  min-width: 96px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 10px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text3);
+}
+
+.collapse-indicator::before {
+  content: "Expandir";
+}
+
+.collapse-indicator::after {
+  content: "+";
+  display: inline-block;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.form-collapsible[open] .collapse-indicator::before {
+  content: "Recolher";
+}
+
+.form-collapsible[open] .collapse-indicator::after {
+  content: "−";
+}
+
+.card-collapse-body {
+  border-top: 1px solid var(--border);
+  padding: 16px 24px 20px;
+}
+
 label {
   font-size: 11px;
   text-transform: uppercase;
@@ -604,6 +670,7 @@ select option {
 }
 
 button:focus-visible,
+summary:focus-visible,
 input:focus-visible,
 select:focus-visible,
 a:focus-visible {
@@ -1147,6 +1214,19 @@ a:focus-visible {
 }
 
 @media (max-width: 600px) {
+  .card-collapse-toggle {
+    padding: 14px 16px;
+  }
+
+  .card-collapse-body {
+    padding: 14px 16px 16px;
+  }
+
+  .collapse-indicator {
+    min-width: 78px;
+    font-size: 9px;
+  }
+
   .shell {
     grid-template-columns: 1fr;
   }

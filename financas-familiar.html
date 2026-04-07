@@ -223,62 +223,67 @@
         <div class="page-sub">Registre despesas avulsas por membro</div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Novo gasto</div>
+      <details class="card form-collapsible">
+        <summary class="card-collapse-toggle">
+          <span class="card-title">Novo gasto</span>
+          <span class="collapse-indicator" aria-hidden="true"></span>
+        </summary>
 
-        <div class="form-grid">
-          <div class="form-col span2">
-            <label for="g-desc">Descrição</label>
-            <input id="g-desc" placeholder="ex: Mercado, Farmácia...">
+        <div class="card-collapse-body">
+          <div class="form-grid">
+            <div class="form-col span2">
+              <label for="g-desc">Descrição</label>
+              <input id="g-desc" placeholder="ex: Mercado, Farmácia...">
+            </div>
           </div>
+
+          <div class="form-grid three">
+            <div class="form-col">
+              <label for="g-val">Valor (R$)</label>
+              <input id="g-val" type="number" placeholder="0,00" min="0" step="0.01">
+            </div>
+            <div class="form-col">
+              <label for="g-membro">Membro</label>
+              <select id="g-membro"></select>
+            </div>
+            <div class="form-col">
+              <label for="g-cat">Categoria</label>
+              <select id="g-cat">
+                <option>Alimentação</option>
+                <option>Transporte</option>
+                <option>Saúde</option>
+                <option>Educação</option>
+                <option>Lazer</option>
+                <option>Moradia</option>
+                <option>Vestuário</option>
+                <option>Outro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid three">
+            <div class="form-col">
+              <label for="g-mes">Mês de referência</label>
+              <input id="g-mes" type="month">
+            </div>
+            <div class="form-col">
+              <label for="g-forma">Forma de pagamento</label>
+              <select id="g-forma">
+                <option>Dinheiro</option>
+                <option>Débito</option>
+                <option>PIX</option>
+                <option>Crédito</option>
+              </select>
+            </div>
+            <div class="form-col">
+              <label for="g-cartao">Cartão (se crédito)</label>
+              <select id="g-cartao" disabled></select>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="addGasto()">+ Adicionar gasto</button>
         </div>
-
-        <div class="form-grid three">
-          <div class="form-col">
-            <label for="g-val">Valor (R$)</label>
-            <input id="g-val" type="number" placeholder="0,00" min="0" step="0.01">
-          </div>
-          <div class="form-col">
-            <label for="g-membro">Membro</label>
-            <select id="g-membro"></select>
-          </div>
-          <div class="form-col">
-            <label for="g-cat">Categoria</label>
-            <select id="g-cat">
-              <option>Alimentação</option>
-              <option>Transporte</option>
-              <option>Saúde</option>
-              <option>Educação</option>
-              <option>Lazer</option>
-              <option>Moradia</option>
-              <option>Vestuário</option>
-              <option>Outro</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-grid three">
-          <div class="form-col">
-            <label for="g-mes">Mês de referência</label>
-            <input id="g-mes" type="month">
-          </div>
-          <div class="form-col">
-            <label for="g-forma">Forma de pagamento</label>
-            <select id="g-forma">
-              <option>Dinheiro</option>
-              <option>Débito</option>
-              <option>PIX</option>
-              <option>Crédito</option>
-            </select>
-          </div>
-          <div class="form-col">
-            <label for="g-cartao">Cartão (se crédito)</label>
-            <select id="g-cartao" disabled></select>
-          </div>
-        </div>
-
-        <button class="btn btn-primary" onclick="addGasto()">+ Adicionar gasto</button>
-      </div>
+      </details>
 
       <div class="card">
         <div class="card-title">Histórico</div>
@@ -295,50 +300,55 @@
         <div class="page-sub">Controle de compras parceladas no cartão</div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Nova parcela</div>
+      <details class="card form-collapsible">
+        <summary class="card-collapse-toggle">
+          <span class="card-title">Nova parcela</span>
+          <span class="collapse-indicator" aria-hidden="true"></span>
+        </summary>
 
-        <div class="form-grid">
-          <div class="form-col span2">
-            <label for="p-desc">Descrição</label>
-            <input id="p-desc" placeholder="ex: TV Samsung, Notebook...">
+        <div class="card-collapse-body">
+          <div class="form-grid">
+            <div class="form-col span2">
+              <label for="p-desc">Descrição</label>
+              <input id="p-desc" placeholder="ex: TV Samsung, Notebook...">
+            </div>
           </div>
+
+          <div class="form-grid three">
+            <div class="form-col">
+              <label for="p-total">Valor total (R$)</label>
+              <input id="p-total" type="number" placeholder="0,00" min="0" step="0.01">
+            </div>
+            <div class="form-col">
+              <label for="p-num">Nº de parcelas</label>
+              <input id="p-num" type="number" min="1" placeholder="12">
+            </div>
+            <div class="form-col">
+              <label for="p-atual">Parcela atual</label>
+              <input id="p-atual" type="number" min="1" placeholder="1">
+            </div>
+          </div>
+
+          <div class="form-grid three">
+            <div class="form-col">
+              <label for="p-membro">Membro</label>
+              <select id="p-membro"></select>
+            </div>
+            <div class="form-col">
+              <label for="p-cartao">Cartão cadastrado</label>
+              <select id="p-cartao"></select>
+            </div>
+            <div class="form-col">
+              <label for="p-inicio">Mês início</label>
+              <input id="p-inicio" type="month">
+            </div>
+          </div>
+
+          <div class="helper-text">Dica: cadastre e atualize limites dos cartões na aba Cartões.</div>
+
+          <button class="btn btn-primary" onclick="addParcela()">+ Adicionar parcela</button>
         </div>
-
-        <div class="form-grid three">
-          <div class="form-col">
-            <label for="p-total">Valor total (R$)</label>
-            <input id="p-total" type="number" placeholder="0,00" min="0" step="0.01">
-          </div>
-          <div class="form-col">
-            <label for="p-num">Nº de parcelas</label>
-            <input id="p-num" type="number" min="1" placeholder="12">
-          </div>
-          <div class="form-col">
-            <label for="p-atual">Parcela atual</label>
-            <input id="p-atual" type="number" min="1" placeholder="1">
-          </div>
-        </div>
-
-        <div class="form-grid three">
-          <div class="form-col">
-            <label for="p-membro">Membro</label>
-            <select id="p-membro"></select>
-          </div>
-          <div class="form-col">
-            <label for="p-cartao">Cartão cadastrado</label>
-            <select id="p-cartao"></select>
-          </div>
-          <div class="form-col">
-            <label for="p-inicio">Mês início</label>
-            <input id="p-inicio" type="month">
-          </div>
-        </div>
-
-        <div class="helper-text">Dica: cadastre e atualize limites dos cartões na aba Cartões.</div>
-
-        <button class="btn btn-primary" onclick="addParcela()">+ Adicionar parcela</button>
-      </div>
+      </details>
 
       <div class="card">
         <div class="card-title">Parcelas cadastradas</div>
@@ -355,37 +365,42 @@
         <div class="page-sub">Cadastre cartões, limite, fechamento e vencimento da fatura</div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Novo cartão</div>
+      <details class="card form-collapsible">
+        <summary class="card-collapse-toggle">
+          <span class="card-title">Novo cartão</span>
+          <span class="collapse-indicator" aria-hidden="true"></span>
+        </summary>
 
-        <div class="form-grid three">
-          <div class="form-col">
-            <label for="c-banco">Banco</label>
-            <select id="c-banco"></select>
+        <div class="card-collapse-body">
+          <div class="form-grid three">
+            <div class="form-col">
+              <label for="c-banco">Banco</label>
+              <select id="c-banco"></select>
+            </div>
+            <div class="form-col">
+              <label for="c-apelido">Apelido (opcional)</label>
+              <input id="c-apelido" placeholder="ex: Nubank Principal">
+            </div>
+            <div class="form-col">
+              <label for="c-limite">Limite atual (R$)</label>
+              <input id="c-limite" type="number" min="0" step="0.01" placeholder="0,00">
+            </div>
           </div>
-          <div class="form-col">
-            <label for="c-apelido">Apelido (opcional)</label>
-            <input id="c-apelido" placeholder="ex: Nubank Principal">
+
+          <div class="form-grid">
+            <div class="form-col">
+              <label for="c-fechamento">Dia de fechamento</label>
+              <input id="c-fechamento" type="number" min="1" max="31" value="7">
+            </div>
+            <div class="form-col">
+              <label for="c-vencimento">Dia de vencimento</label>
+              <input id="c-vencimento" type="number" min="1" max="31" value="15">
+            </div>
           </div>
-          <div class="form-col">
-            <label for="c-limite">Limite atual (R$)</label>
-            <input id="c-limite" type="number" min="0" step="0.01" placeholder="0,00">
-          </div>
+
+          <button class="btn btn-primary" onclick="addCartao()">+ Cadastrar cartão</button>
         </div>
-
-        <div class="form-grid">
-          <div class="form-col">
-            <label for="c-fechamento">Dia de fechamento</label>
-            <input id="c-fechamento" type="number" min="1" max="31" value="7">
-          </div>
-          <div class="form-col">
-            <label for="c-vencimento">Dia de vencimento</label>
-            <input id="c-vencimento" type="number" min="1" max="31" value="15">
-          </div>
-        </div>
-
-        <button class="btn btn-primary" onclick="addCartao()">+ Cadastrar cartão</button>
-      </div>
+      </details>
 
       <div class="card">
         <div class="card-title">Cartões cadastrados</div>
@@ -399,21 +414,27 @@
         <div class="page-sub">Gerencie os membros da família</div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Adicionar membro</div>
-        <div class="form-grid">
-          <div class="form-col">
-            <label for="m-nome">Nome</label>
-            <input id="m-nome" placeholder="ex: Maria, João...">
+      <details class="card form-collapsible">
+        <summary class="card-collapse-toggle">
+          <span class="card-title">Adicionar membro</span>
+          <span class="collapse-indicator" aria-hidden="true"></span>
+        </summary>
+
+        <div class="card-collapse-body">
+          <div class="form-grid">
+            <div class="form-col">
+              <label for="m-nome">Nome</label>
+              <input id="m-nome" placeholder="ex: Maria, João...">
+            </div>
+            <div class="form-col">
+              <label>Cor</label>
+              <div class="color-options" id="color-options"></div>
+              <input type="hidden" id="m-cor" value="#c9a96e">
+            </div>
           </div>
-          <div class="form-col">
-            <label>Cor</label>
-            <div class="color-options" id="color-options"></div>
-            <input type="hidden" id="m-cor" value="#c9a96e">
-          </div>
+          <button class="btn btn-primary" onclick="addMembro()">+ Adicionar membro</button>
         </div>
-        <button class="btn btn-primary" onclick="addMembro()">+ Adicionar membro</button>
-      </div>
+      </details>
 
       <div class="card">
         <div class="card-title">Membros da família</div>
