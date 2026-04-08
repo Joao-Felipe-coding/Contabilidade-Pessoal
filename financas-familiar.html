@@ -66,7 +66,7 @@
           <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
           <rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/>
         </svg>
-        Resumo
+        Início
       </button>
 
       <button class="nav-btn" data-page="gastos" onclick="showPageWithMenuClose('gastos', this)">
@@ -109,7 +109,7 @@
           <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
           <rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/>
         </svg>
-        <span class="tablet-nav-text">Resumo</span>
+        <span class="tablet-nav-text">Início</span>
       </button>
       <button class="tablet-nav-item" data-page="gastos" onclick="navigatePage('gastos', this)">
         <svg class="tablet-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -159,9 +159,41 @@
 
     <div id="page-resumo" class="page active">
       <div class="page-header">
-        <div class="page-title">Resumo</div>
+        <div class="page-title">Gestão</div>
         <div class="page-sub" id="resumo-sub">Visão geral do mês</div>
       </div>
+
+      <section class="card assistant-card" id="assistant-card" aria-labelledby="assistant-title">
+        <div class="assistant-head">
+          <div>
+            <div id="assistant-title" class="card-title">Assistente IA Financeiro</div>
+            <div class="assistant-sub">Descreva em linguagem natural o que deseja adicionar ou pergunte sobre suas contas.</div>
+          </div>
+          <span class="badge badge-blue">Nova função</span>
+        </div>
+
+        <div id="ai-chat-log" class="ai-chat-log" aria-live="polite"></div>
+
+        <div id="ai-draft-box" class="ai-draft-box" hidden>
+          <div class="ai-draft-top">
+            <span class="ai-draft-label">Dados entendidos pela IA</span>
+            <span id="ai-draft-type" class="badge badge-gold"></span>
+          </div>
+          <div id="ai-draft-summary" class="ai-draft-summary"></div>
+          <div id="ai-draft-missing" class="ai-draft-missing"></div>
+          <div id="ai-draft-form" class="ai-form-grid"></div>
+          <div class="ai-draft-actions">
+            <button class="btn btn-primary btn-sm" type="button" onclick="confirmAssistantDraft()">Confirmar e salvar</button>
+            <button class="btn btn-danger btn-sm" type="button" onclick="cancelAssistantDraft()">Cancelar</button>
+          </div>
+        </div>
+
+        <div class="ai-compose">
+          <input id="ai-input" placeholder="Ex: adicionar gasto de R$ 120 mercado no crédito nubank" autocomplete="off">
+          <button id="ai-send-btn" class="btn btn-primary" type="button" onclick="submitAssistantMessage()">Enviar</button>
+        </div>
+        <div class="assistant-tip">Dica: revise os campos detectados, ajuste o que estiver errado e confirme.</div>
+      </section>
 
       <div class="metrics" id="metrics"></div>
 
@@ -453,12 +485,12 @@
 
   <!-- Bottom Navigation Bar (Mobile) -->
   <nav class="bottom-nav">
-    <button class="bottom-nav-item active" data-page="resumo" onclick="navigatePage('resumo', this)" aria-label="Resumo">
+    <button class="bottom-nav-item active" data-page="resumo" onclick="navigatePage('resumo', this)" aria-label="Início">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/>
         <rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/>
       </svg>
-      <span class="bottom-nav-text">Resumo</span>
+      <span class="bottom-nav-text">Início</span>
     </button>
     <button class="bottom-nav-item" data-page="gastos" onclick="navigatePage('gastos', this)" aria-label="Gastos">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
