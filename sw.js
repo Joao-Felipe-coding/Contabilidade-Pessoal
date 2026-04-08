@@ -1,11 +1,16 @@
-const CACHE_VERSION = "ninos-financas-v18";
+const CACHE_VERSION = "ninos-financas-v21";
 
 const CORE_ASSETS = [
   "./",
   "./financas-familiar.html",
   "./manifest.webmanifest",
   "./assets/css/main.css",
+  "./assets/css/main-base.css",
+  "./assets/css/main-responsive.css",
   "./assets/js/app.js",
+  "./assets/js/app-core.js",
+  "./assets/js/app-assistant.js",
+  "./assets/js/app-actions.js",
   "./assets/icons/favicon.svg",
   "./assets/icons/favicon-32.png",
   "./assets/icons/favicon-16.png",
