@@ -71,6 +71,7 @@
     letter-spacing: 0.1px;
     padding: 8px 6px;
     text-align: center;
+    transition: all var(--transition-base);
   }
 
   .tablet-nav-icon {
@@ -79,7 +80,7 @@
     stroke: currentColor;
     fill: none;
     opacity: 0.85;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition: transform var(--transition-base), opacity var(--transition-base);
   }
 
   .tablet-nav-text {
@@ -92,12 +93,13 @@
     color: var(--text);
     border-color: var(--accent);
     background: var(--surface3);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
   .tablet-nav-item:hover .tablet-nav-icon {
     opacity: 1;
-    transform: scale(1.06);
+    transform: scale(1.08);
   }
 
   .tablet-nav-item.active {
@@ -370,6 +372,53 @@
   }
 }
 
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(201, 169, 110, 0);
+  }
+}
+
 @keyframes navItemActive {
   0% {
     transform: scale(0.85);
@@ -404,13 +453,13 @@
 .loading-screen {
   position: fixed;
   inset: 0;
-  background: var(--bg);
+  background: linear-gradient(135deg, var(--bg) 0%, rgba(24, 24, 24, 0.98) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
   opacity: 1;
-  transition: opacity 0.6s ease-out;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .loading-screen.hidden {
@@ -428,6 +477,7 @@
   color: var(--accent2);
   letter-spacing: -1px;
   margin-bottom: 20px;
+  text-shadow: 0 2px 8px rgba(232, 201, 138, 0.2);
 }
 
 .loading-spinner {
@@ -438,6 +488,7 @@
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
+  box-shadow: 0 0 12px rgba(201, 169, 110, 0.15);
 }
 
 @keyframes loadingBounce {
@@ -467,6 +518,11 @@
   cursor: pointer;
   padding: 0;
   margin-right: 12px;
+  transition: all 0.2s ease;
+}
+
+.menu-toggle:hover {
+  transform: scale(1.1);
 }
 
 .menu-toggle span {
@@ -492,13 +548,14 @@
   color: var(--text);
   font-size: 20px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10;
 }
 
 .sidebar-close:hover {
   background: var(--surface3);
   transform: rotate(90deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-overlay {
@@ -508,6 +565,7 @@
   background: rgba(0, 0, 0, 0.5);
   z-index: 199;
   animation: fadeIn 0.3s ease-out;
+  transition: opacity 0.3s ease-out;
 }
 
 .sidebar-overlay.active {
@@ -828,6 +886,7 @@ body.modal-open {
   justify-content: center;
   padding: 16px;
   z-index: 1300;
+  animation: fadeIn 0.3s ease;
 }
 
 .confirm-modal.active {
@@ -841,6 +900,7 @@ body.modal-open {
   border-radius: var(--r);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
   padding: 16px;
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .confirm-title {
@@ -871,28 +931,36 @@ body.modal-open {
   background: rgba(24, 24, 24, 0.95);
   color: var(--text);
   font-size: 12px;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
   opacity: 0;
   transform: translateY(8px);
-  animation: toastIn 0.2s ease forwards;
+  animation: toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  backdrop-filter: blur(10px);
 }
 
 .toast.toast-success {
   border-color: rgba(106, 170, 132, 0.5);
+  box-shadow: 0 12px 32px rgba(106, 170, 132, 0.15);
 }
 
 .toast.toast-error {
   border-color: rgba(212, 102, 90, 0.5);
+  box-shadow: 0 12px 32px rgba(212, 102, 90, 0.15);
 }
 
 .toast.toast-info {
   border-color: rgba(107, 159, 212, 0.5);
+  box-shadow: 0 12px 32px rgba(107, 159, 212, 0.15);
 }
 
 @keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 

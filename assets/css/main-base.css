@@ -19,6 +19,10 @@
   --blue-dim: rgba(107, 159, 212, 0.12);
   --r: 10px;
   --r-sm: 6px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *,
@@ -141,12 +145,14 @@ select {
   font-size: 13px;
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s;
+  transition: all var(--transition-base);
+  position: relative;
 }
 
 .nav-btn:hover {
   background: var(--surface2);
   color: var(--text);
+  transform: translateX(2px);
 }
 
 .nav-btn.active {
@@ -201,12 +207,14 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  transition: all var(--transition-base);
 }
 
 .month-nav-row button:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: rgba(201, 169, 110, 0.08);
+  transform: scale(1.1);
 }
 
 .month-current {
@@ -227,12 +235,15 @@ select {
   border-radius: var(--r-sm);
   font-size: 12px;
   cursor: pointer;
+  transition: all var(--transition-base);
 }
 
 .month-reset-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
   background: var(--accent-dim);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(201, 169, 110, 0.12);
 }
 
 .main {
@@ -272,6 +283,14 @@ select {
   border-radius: var(--r);
   padding: 20px 24px;
   margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.card:hover {
+  border-color: var(--border2);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .card-title {
@@ -294,12 +313,17 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--r);
   padding: 18px 20px;
-  transition: border-color 0.15s;
+  transition: all var(--transition-base);
   animation: slideUp 0.25s ease both;
+  box-shadow: var(--shadow-sm);
+  cursor: default;
 }
 
 .metric:hover {
-  border-color: var(--border2);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  background: rgba(24, 24, 24, 0.8);
 }
 
 .metric-label {
@@ -440,14 +464,17 @@ select {
   padding: 9px 12px;
   width: 100%;
   outline: none;
-  transition: border-color 0.15s;
+  transition: all var(--transition-base);
   -webkit-appearance: none;
   appearance: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 input:focus,
 select:focus {
   border-color: var(--accent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(201, 169, 110, 0.1);
+  background: rgba(33, 33, 33, 0.8);
 }
 
 input::placeholder {
@@ -478,6 +505,15 @@ select option {
   background:
     radial-gradient(circle at 95% 0%, rgba(201, 169, 110, 0.16), transparent 45%),
     var(--surface);
+  box-shadow: 0 0 20px rgba(201, 169, 110, 0.08);
+  transition: all var(--transition-base);
+  position: relative;
+  border: 1px solid var(--accent);
+}
+
+.assistant-card:hover {
+  box-shadow: 0 0 30px rgba(201, 169, 110, 0.15), var(--shadow-md);
+  border-color: var(--accent2);
 }
 
 .assistant-head {
@@ -745,6 +781,13 @@ select option {
   border-radius: var(--r-sm);
   padding: 10px;
   margin-bottom: 8px;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.alert-item:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateX(2px);
 }
 
 .alert-item.level-low {
@@ -800,25 +843,47 @@ select option {
   font-family: "DM Sans", sans-serif;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-base);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .btn:hover {
   background: var(--surface3);
   color: var(--text);
   border-color: var(--border2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn:active {
+  transform: translateY(0);
 }
 
 .btn-primary {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent2);
+  box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.1);
+  transition: all var(--transition-base);
 }
 
 .btn-primary:hover {
   background: rgba(201, 169, 110, 0.2);
   color: var(--accent2);
+  box-shadow: 0 0 12px rgba(201, 169, 110, 0.2);
+  border-color: var(--accent);
 }
 
 .btn-danger {
@@ -863,7 +928,13 @@ a:focus-visible {
   gap: 12px;
   padding: 13px 0;
   border-bottom: 1px solid var(--border);
-  transition: background 0.1s;
+  transition: all var(--transition-base);
+}
+
+.list-item:hover {
+  background: rgba(42, 42, 42, 0.3);
+  padding-left: 4px;
+  padding-right: 0;
 }
 
 .list-item:last-child {
@@ -1005,12 +1076,17 @@ a:focus-visible {
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-base);
+}
+
+.color-opt:hover {
+  transform: scale(1.1);
 }
 
 .color-opt.selected {
   border-color: white;
   transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(240, 237, 232, 0.3);
 }
 
 .parcela-card {
